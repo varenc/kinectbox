@@ -374,6 +374,10 @@ DropboxActions = {
     },
     open_selected : function() {
         jQuery(BrowseSelection.get_selected_files()[0].get_div()).find('.filename-link')[0].simulate('click');
+    },
+    go_up_directory : function() {
+        //this will escape gallery view AND go up a directory
+        BrowseKeys.advanced_dict.up_dir.onPress();
     }
 };
 
