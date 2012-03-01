@@ -13,7 +13,7 @@ var otherlib=false,
     vidcontainer.style.backgroundColor = 'black';
     vidcontainer.style.height = '112px';
     vidcontainer.style.width = '150px';
-    vidcontainer.innerHTML = '<img src=\"https://dl.dropbox.com/s/jd57hlkkmpey86m/dbx_animation.gif?dl=1\" />'
+    vidcontainer.innerHTML = '<img src=\"https://dl.dropbox.com/s/jd57hlkkmpey86m/dbx_animation.gif?dl=1\" />';
 // more or less stolen form jquery core and adapted by paul irish
 function getScript(url,success){
     var script=document.createElement('script');
@@ -44,8 +44,8 @@ function runEverything() {
     console.log('killed parter branding');
     // start the video
 
-    console.log(vidcontainer)
-    vidcontainer.innerHTML = '<div id=\"canvasCont\"><div id=\"depthCan\"><canvas style=\"width:100%; height:100%;\" id=\"depth\" width=\"160\" height=\"120\"></canvas></div></div>'
+    console.log(vidcontainer);
+    vidcontainer.innerHTML = '<div id=\"canvasCont\"><div id=\"depthCan\"><canvas style=\"width:100%; height:100%;\" id=\"depth\" width=\"160\" height=\"120\"></canvas></div></div>';
     jQuery('#main-nav').append('<div id=\"waveTell\">WAVE TO GET CURSOR</div>');
     var pluginContainer = document.body.appendChild(document.createElement('div'));
     pluginContainer.id = 'pluginContainer';
@@ -93,7 +93,7 @@ function runEverything() {
     }
     function drawDM(plugin) {
         var dm = plugin.depthMap;
-        if (dm.length == 0) return;
+        if (dm.length === 0) return;
         var canv = document.getElementById('depth');
         var ctx = canv.getContext('2d');
         var pix = ctx.createImageData(160,120);
@@ -212,7 +212,7 @@ function runEverything() {
         ne.removeClass('kinectArrow');
         jQuery('body').append(ne);
         console.log(ne);
-        ne.animate({opacity: 1}, 1000)
+        ne.animate({opacity: 1}, 1000);
         setTimeout(function(){
             console.log(ot, ol);
             jQuery('#tempElementThing').remove();
@@ -341,7 +341,7 @@ function runEverything() {
         //yAvger = simple_moving_averager(avgDepth);
         console.log('dsrelease....');
 
-        jQuery('#cursor').css('opacity', .5)
+        jQuery('#cursor').css('opacity', 0.5);
         jQuery("#cursor").css('width', cursorWidth);
         jQuery("#cursor").css('height', cursorWidth);
     }
@@ -355,7 +355,7 @@ function runEverything() {
         //xAvger = stationary_number(jQuery("#cursor").css('left'));
         //yAvger = stationary_number(jQuery("#cursor").css('top'));
         console.log('dsPUSH');
-        jQuery('#cursor').css('opacity', .8)
+        jQuery('#cursor').css('opacity', 0.8);
         jQuery("#cursor").css('width', cursorWidth * 1.2);
         jQuery("#cursor").css('height', cursorWidth * 1.2);
     }
