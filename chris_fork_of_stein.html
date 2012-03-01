@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Kinect Hax0rz. super l33t</title>
+        <script src='zig-full.js'></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
+        <!-- video shit -->
+        <script>
+            $(function() {
+                setTimeout(function() {$("a[href=http://site.zigfu.com/main/watermark]").css('opacity',0)}, 600);
+                setTimeout(function() {$("a[href=http://site.zigfu.com/main/watermark]").css('opacity',0)}, 1000);
+            });
+
+            var codexStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            var codexInt = [];
+            for(var i = 0; i < 256; i++) {
+              var idx = codexStr.indexOf(String.fromCharCode(i));
+              codexInt[i] = idx;
+            }
+            var Base64 =
+            {
+                decode : function (input)
+                {
+                    var output = new Array(input.length*3/4);
+                    var inLength = input.length;
+                    var outIndex = 0;
+                    for (var i = 0; i < inLength; i += 4) {
+                        var enc1 = codexInt[input.charCodeAt(i)];
+                        var enc2 = codexInt[input.charCodeAt(i+1)];
+                        var enc3 = codexInt[input.charCodeAt(i+2)];
+                        var enc4 = codexInt[input.charCodeAt(i+3)];
+
+                        var chr1 = (enc1 << 2) | (enc2 >> 4);
+                        var chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                        var chr3 = ((enc3 & 3) << 6) | enc4;
+
+                        output[outIndex] = chr1;
+                        output[outIndex+1] = chr2;
+                        output[outIndex+2] = chr3;
+                        outIndex += 3;
+                    }
+                    return output;
+                }
+            }
+            function drawDM(plugin) {
+                var dm = plugin.depthMap;
+                if (dm.length == 0) return;
+                var canv = document.getElementById('depth');
+                var ctx = canv.getContext('2d');
+                var pix = ctx.createImageData(160,120);
+                var data = pix.data;
+                var srcData = Base64.decode(dm);
+                for(var i = 0; i < 160*120; i++) {
+                  data[i*4 + 1] = (10-srcData[i*2+1]) << 5;
+                  data[i*4 + 2] = 128;
+                  data[i*4 + 3] = 255;
+                }
+                ctx.putImageData(pix, 0, 0);
+              }
+        </script>
+
+        <!-- tracking -->
+        <script>
+            function updateHead(pos) {
+                $("#the-head").css('left',pos[0]*1.2+250+"px").css('top',(400-pos[1])+"px");
+            }
+            function updateLeftHand(pos) {
+                $("#the-lh").css('left',pos[0]*1.2+250+"px").css('top',(200-pos[1])+"px");
+            }
+            function updateRightHand(pos) {
+                $("#the-rh").css('left',pos[0]*1.2+250+"px").css('top',(200-pos[1])+"px");
+            }
+        </script>
+
+        <!-- loadtime shit -->
+        <script>
+$(function() {
+            zig.addEventListener('statuschange', function() {
+                console.log("Sensor connected: " + zig.sensorConnected);
+            });
+
+
+            var engager = zig.EngageUsersWithSkeleton(1);
+            engager.addEventListener('userengaged', function(user) {
+                console.log('User engaged: ' + user.id);
+            });
+            engager.addEventListener('userdisengaged', function(user) {
+                console.log('User disengaged: ' + user.id);
+            });
+
+            zig.addListener(engager);
+
+
+            var c = zig.controls.Cursor();
+            var ce = document.createElement('div');
+            ce.style.position = 'fixed';
+            ce.style.display = 'none';
+            ce.style.width = '50px';
+            ce.style.height = '50px';
+            ce.style.backgroundColor = 'blue';
+            document.body.appendChild(ce);
+
+            // show/hide cursor on session start/end
+            zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
+                ce.style.display = 'block';
+            });
+            zig.singleUserSession.addEventListener('sessionend', function() {
+                ce.style.display = 'none';
+            });
+
+            // move the cursor element on cursor move
+            c.addEventListener('move', function(cursor) {
+                ce.style.left = (c.x * window.innerWidth - (ce.offsetWidth / 2)) + "px";
+                ce.style.top = (c.y * window.innerHeight - (ce.offsetHeight / 2)) + "px";
+            });
+
+            c.addEventListener('click', function(c) {
+                console.log('CLICKETY CLACK');
+            });
+
+            c.addEventListener('push', function(c) {
+                console.log('PUSH');
+                ce.classList.add('pushed');
+            });
+            c.addEventListener('release', function(c) {
+                console.log('release....');
+                ce.classList.remove('pushed');
+            });
+
+
+            // add the cursor to our singleUserSession to make sure we get events
+            zig.singleUserSession.addListener(c);
+
+
+
+            /*
+            engager.addEventListener('userengaged', function(user) {
+                console.log('User engaged: ' + user.id);
+                user.addEventListener('userupdate', function(user) {
+                    //console.log('Head position: ' + user.skeleton[zig.Joint.Head].position);
+                    updateHead(user.skeleton[zig.Joint.Head].position);
+                    updateLeftHand(user.skeleton[zig.Joint.LeftHand].position);
+                    updateRightHand(user.skeleton[zig.Joint.RightHand].position);
+                });
+            });
+
+            engager.addEventListener('userdisengaged', function(user) {
+                console.log('User disengaged: ' + user.id);
+            });
+            zig.addListener(engager);
+
+
+            function ZigPluginLoaded() {
+                var plugin = document.getElementById("ZigPlugin");
+                var handleDepth = function(u) {
+                    drawDM(plugin);
+                }
+                plugin.addEventListener("NewFrame", handleDepth, false);
+                plugin.requestStreams(true, true, false);
+            }
+            */
+});
+        </script>
+
+    </head>
+
+    <body>
+        <!--
+        <div>
+            <div>
+            <img src="http://3.bp.blogspot.com/_xDZKtYhi_6s/S8geGLKQkKI/AAAAAAAAAXY/_Ym25pyqHv4/s1600/human_head_reference_picture_front.jpg" width=200  style="position:fixed"  id="the-head">
+            </div>
+        <div>
+            <img src="http://thebusinessoffun.files.wordpress.com/2011/10/hands.jpg" width=100 id="the-rh" style="position:fixed">
+        </div>
+        <div style="position:fixed">
+            <img src="http://media.tumblr.com/tumblr_lkosjeqGDM1qcru51.jpg" width=100  id="the-lh" style="position:fixed">
+        </div>
+        -->
+    <div id="container" style="position:absolute; z-index:-1; width:100%">
+        <div id="canvasCont">
+            <div id="depthCan"><canvas style="width:100%; height:100%;" id='depth' width='160' height='120'></canvas>
+        </div>
+    </div>
+
+    <!-- ZigJS plugin -->
+    <div id="pluginContainer">
+        <object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+            <param name="onload" value="ZigPluginLoaded" />
+        </object>
+    </div>
+    </body>
+</html>

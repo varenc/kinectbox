@@ -1,0 +1,100 @@
+notes:
+
+=============================================
+get all files and absolute positions on www2:
+=============================================
+$jq('.browse-file').each( function(n, e){var ofst = $jq('#'+e.id).offset(); console.log(n, e);console.log('left', ofst.left, 'top', ofst.top);})
+
+
+====================
+inject the video div
+====================
+var loadingVideoAnimation = $('<div style=\"margin: 25px 0px; background-color:black; z-index:65000; height:112px; width:150px;"><img id=\"deleteThis\" src=\"dbx_animation.gif\"');
+
+//also include video with display:none;
+
+$jq('#main-nav').append(divVarThing).append("<div id=\"container\" style=\"position:absolute; z-index:-1; top:20%; width:10%; height:10%;\"><div id=\"canvasCont\"><div id=\"depthCan\"><canvas style=\"width:100%; height:100%;\" id=\"depth\" width=\"150\" height=\"112\"></canvas></div></div></div>");
+
+$jq("#depthCan").hide()
+
+//after
+loadingVideoAnimation.detach();
+$jq("#depthCan").show();
+
+
+
+======================
+generate a click event at coordinates
+======================
+c.addEventListener('click', function(c) {
+  var xpos = c.x * window.innerWidth;
+  var ypos = c.y * window.innerHeight;
+  var evt = document.createEvent("MouseEvents");
+  evt.initMouseEvent("click", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
+  elt.dispatchEvent(evt);
+});
+
+
+
+
+=============
+chris - how to do the actions
+=============
+//delete selection
+FileOps.do_bulk_delete(BrowseSelection.get_selected_files())
+
+//cut
+to_copy = BrowseSelection.get_selected_files()
+
+//paste (when a folder is selected)
+//What about pasting into the current folder?? hmmm
+FileOps.do_bulk_move(to_copy, BrowseSelection.get_selected_files()[0].fq_path)
+
+//open
+//this simulates a click on the file name.
+//makes use of the prototype extension I also added to the end of chris_dropbox_inject.js (which is really a fork of yours)
+jQuery(BrowseSelection.get_selected_files()[0].get_div()).find('.filename-link')[0].simulate('click')
+
+===========
+dan notes
+===========
+
+BrowseSeletion
+FINAL OBJECT is the BrowseSelection public API
+set_selected_files takes JS objects
+Browse.files gets you all files
+Browse.scrollTo
+BrowseUtil.get_files_in_view --> only shows files in the view port!
+
+
+
+
+
+I drew a thingy
+           /\         /\
+          /  \       /  \
+         /    \     /    \
+        /      \   /      \
+       /        \ /        \
+       \        /|\        /
+        \      / | \      /
+         \    /  |  \    /
+          \  /   |   \  /
+           \/    |    \/
+           /\    |    /\
+          /  \   |   /  \
+         /    \  |  /    \
+        /      \ | /      \
+       /        \|/        \
+       \        /I\        /
+        \      / I \      /
+         \    /  I  \    /
+          \  /   I   \  /
+           \/    I    \/
+           |     I     |
+           \     I     /
+            \    I    /
+             \   I   /
+              \  I  /
+               \ I /
+                \I/
