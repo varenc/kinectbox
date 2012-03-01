@@ -374,6 +374,21 @@ function runEverything() {
 
 console.log('functions loaded...');
 
+DropboxActions = {
+    clipboard : 'undefined',
+    delete_selected : function() {
+        FileOps.do_bulk_delete(BrowseSelection.get_selected_files());
+    },
+    store_selected_to_clipboard : function() {
+        clipboard = BrowseSelection.get_selected_files();
+    },
+    paste_to_selected_folder : function() {
+        FileOps.do_bulk_move(clipboard, BrowseSelection.get_selected_files()[0].fq_path);
+    },
+    open_selected : function() {
+        jQuery(BrowseSelection.get_selected_files()[0].get_div()).find('.filename-link')[0].simulate('click');
+    }
+};
 
 function simple_moving_averager(period) {
     var nums = [];
