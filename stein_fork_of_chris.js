@@ -58,10 +58,14 @@ function runEverything() {
     plugin.addEventListener("NewFrame", handleDepth, false);
     plugin.requestStreams(true, true, false);
 
+    //constants shoule go here
+    var isPushed = false;
+
     //video redering helpers
     var codexStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     var codexInt = [];
     var saturate = 128;
+
     for(var i = 0; i < 256; i++) {
         var idx = codexStr.indexOf(String.fromCharCode(i));
         codexInt[i] = idx;
@@ -91,6 +95,7 @@ function runEverything() {
             return output;
         }
     }
+    
     function drawDM(plugin) {
         var dm = plugin.depthMap;
         if (dm.length === 0) return;
@@ -135,7 +140,7 @@ function runEverything() {
     cursorDiv.css('border-radius', cursorWidth/2).css('z-index', 65535);
     jQuery('body').append(cursorDiv);
     // add some pop-up shit. super
-    jQuery('#cursor').append('<div id=\"cursor\" style=\"background-color:blue; border-radius:15px; height:30px; width:30px; left:400px; top:150px; position:absolute;\"><div id=\"leftarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:-170px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:18px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"uparrow\" class=\"kinectArrow\" style=\"position:absolute; top:-170px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"rightarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:80px;\"><img src=\"https://dl.dropbox.com/s/32kltg8ooibjmx8/rightarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:40px; left:55px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"downarrow\" class=\"kinectArrow\" style=\"position:absolute; top:80px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/8pfm4whijw18vw8/downarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"motivator\" class='kinectArrow' style=\"position:absolute; top:-40px; left:-40px; font-weight:bold; font-size:30px; text-align:center;\"> THROW THE FILE! </div></div>');
+    jQuery('#cursor').append('<div id=\"leftarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:-170px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:18px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"uparrow\" class=\"kinectArrow\" style=\"position:absolute; top:-170px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"rightarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:80px;\"><img src=\"https://dl.dropbox.com/s/32kltg8ooibjmx8/rightarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:40px; left:55px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"downarrow\" class=\"kinectArrow\" style=\"position:absolute; top:80px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/8pfm4whijw18vw8/downarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"motivator\" class=\"kinectArrow\" style=\"position:absolute; top:-40px; left:-40px; font-weight:bold; font-size:30px; text-align:center;\"> THROW THE FILE! </div>');
     jQuery('.kinectArrow').css('opacity', 0.6).hide();
     jQuery('body').append(jQuery('<div>').css('position', 'fixed').css('height', cursorWidth + 'px').css('z-index', 65536).attr('id', 'fileCursor'));
     jQuery('#fileCursor').hide();
@@ -199,8 +204,8 @@ function runEverything() {
     }
 
     function lingerify(e){
-        var ot = jQuery('#cursor').offset().top;
-        var ol = jQuery('#cursor').offset().left;
+        var ot = jQuery('#cursor').css('top');
+        var ol = jQuery('#cursor').css('left');
         console.log(ot, ol);
         var ne = e.clone().css('left', ot)
                     .css('top', ol)
@@ -219,60 +224,64 @@ function runEverything() {
         }, 2000);
     }
 
+    function handlePush(x, y){
+        jQuery("#fileCursor").css('left', x + "px");
+        jQuery("#fileCursor").css('top', y + "px");
+
+        var relative_x = x - parseFloat(jQuery('#cursor').css('left'));
+        var relative_y = y - parseFloat(jQuery('#cursor').css('top'));
+        var threshold = 50;
+        var final_threshold = 120;
+
+        var el;
+        if ((relative_x > threshold) && (relative_x > Math.abs(relative_y))){
+            if (relative_x > final_threshold){
+                el = jQuery('#rightarrow');
+                rightAction();
+            } else {
+                jQuery('.kinectArrow').css('opacity', 0.6);
+                jQuery('#rightarrow').css('opacity', 1);
+            }
+        }
+        if ((relative_x < -threshold) && (relative_x < -Math.abs(relative_y))){
+            if (relative_x < -final_threshold){
+                el = jQuery('#leftarrow').clone();
+                leftAction();
+            } else {
+                jQuery('.kinectArrow').css('opacity', 0.6);
+                jQuery('#leftarrow').css('opacity', 1);
+            }
+        }
+        if ((relative_y > threshold) && (relative_y > Math.abs(relative_x))){
+            if (relative_x > final_threshold){
+                el = jQuery('#downarrow').clone();
+                downAction();
+            } else {
+                jQuery('.kinectArrow').css('opacity', 0.6);
+                jQuery('#downarrow').css('opacity', 1);
+            }
+        }
+        if ((relative_y < -threshold) && (relative_y < -Math.abs(relative_x))){
+            if (relative_y < -final_threshold){
+                el = jQuery('#uparrow').clone();
+                topAction();
+            } else {
+                jQuery('.kinectArrow').css('opacity', 0.6);
+                jQuery('#uparrow').css('opacity', 1);
+            }
+        }
+        if (Math.max(Math.abs(relative_y), Math.abs(relative_x)) > final_threshold) {
+            releaseFunc(null);
+            lingerify(el);
+        }
+    }
+
     function moveHandler(cursor) {
-        x = xAvger(getX(c));
-        y = yAvger(getY(c));
+        var x = xAvger(getX(c));
+        var y = yAvger(getY(c));
         //console.log('rx ry x y bottom top', Math.floor(getX(c)), Math.floor(getY(c)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
         if (isPushed){
-            jQuery("#fileCursor").css('left', x + "px");
-            jQuery("#fileCursor").css('top', y + "px");
-
-            var relative_x = x - parseFloat(jQuery('#cursor').css('left'));
-            var relative_y = y - parseFloat(jQuery('#cursor').css('top'));
-            var threshold = 50;
-            var final_threshold = 120;
-
-            var el;
-            if ((relative_x > threshold) && (relative_x > Math.abs(relative_y))){
-                if (relative_x > final_threshold){
-                    el = jQuery('#rightarrow');
-                    rightAction();
-                } else {
-                    jQuery('.kinectArrow').css('opacity', 0.6);
-                    jQuery('#rightarrow').css('opacity', 1);
-                }
-            }
-            if ((relative_x < -threshold) && (relative_x < -Math.abs(relative_y))){
-                if (relative_x < -final_threshold){
-                    el = jQuery('#leftarrow').clone();
-                    leftAction();
-                } else {
-                    jQuery('.kinectArrow').css('opacity', 0.6);
-                    jQuery('#leftarrow').css('opacity', 1);
-                }
-            }
-            if ((relative_y > threshold) && (relative_y > Math.abs(relative_x))){
-                if (relative_x > final_threshold){
-                    el = jQuery('#downarrow').clone();
-                    downAction();
-                } else {
-                    jQuery('.kinectArrow').css('opacity', 0.6);
-                    jQuery('#downarrow').css('opacity', 1);
-                }
-            }
-            if ((relative_y < -threshold) && (relative_y < -Math.abs(relative_x))){
-                if (relative_y < -final_threshold){
-                    el = jQuery('#uparrow').clone();
-                    topAction();
-                } else {
-                    jQuery('.kinectArrow').css('opacity', 0.6);
-                    jQuery('#uparrow').css('opacity', 1);
-                }
-            }
-            if (Math.max(Math.abs(relative_y), Math.abs(relative_x)) > final_threshold) {
-                releaseFunc(null);
-                lingerify(el);
-            }
+            handlePush(x, y);
             return;
         }
         jQuery("#cursor").css('left', x + "px");
@@ -282,36 +291,29 @@ function runEverything() {
         browseFileParent = cursorOver.closest('.browse-file');
 
         if (browseFileParent != []) {
-            //console.log("selecting whats under me! coords = [" + x + ", " + y + "]");
             //we're over a file...select it!
             browseObj = BrowseFile.from_elem(browseFileParent[0]);
             if (typeof browseObj == 'undefined') {
                 //console.log("sadly unable to get the browsefile object....SADFACE");
-                //return;
             } else {
                 BrowseSelection.set_selected_files(browseObj);
             }
             extreme_indexes = BrowseUtil.get_files_in_view();
-            //console.log("Last in view -->" + last_file_index + "    and the current selected one = "+ browseObj.sort_rank);
             if (y >= window.innerHeight - 15) {
                 //scrolls us down one
                 var rank = BrowseSelection.get_selected_files()[0].sort_rank;
-                //console.log('we at the end!!', rank);
                 scrollLimiter.doIfCan(function() {
                     Browse.scrollTo(Browse.files[rank + 1].get_div());
                     BrowseSelection.set_selected_files(Browse.files[Math.max(Browse.files.length-1, rank+1)]);
                 });
-                //Browse.scrollTo(Browse.files[BrowseUtil.get_files_in_view()[1]].get_div());
             }
             if (y <= TOP_OFFSET + 5) {
                 //scrolls us down one
                 var rank = BrowseSelection.get_selected_files()[0].sort_rank;
-                //console.log('we at the start!!', rank);
                 scrollLimiter.doIfCan(function() {
                     Browse.scrollTo(Browse.files[rank - 1].get_div());
                     BrowseSelection.set_selected_files(Browse.files[Math.max(0, rank-1)]);
                 });
-                //Browse.scrollTo(Browse.files[BrowseUtil.get_files_in_view()[1]].get_div());
             }
         }
     }
@@ -320,25 +322,12 @@ function runEverything() {
         console.log("CLICKETY-CLACK CLACK!");
         var xpos = c.x * window.innerWidth;
         var ypos = c.y * window.innerHeight;
-
-        //comment from stein: I don't think we're good enough for clickin. :(
-        //edit: i tweaked zip-full. we're better now
-
-        //this will click on the current position....
-        /*var evt = document.createEvent("MouseEvents");
-        evt.initMouseEvent("click", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
-        window.dispatchEvent(evt);
-        */
     }
-
-    var isPushed = false;
 
     function releaseFunc(c) {
         isPushed = false;
         jQuery('.kinectArrow').hide();
         jQuery('#fileCursor').hide();
-        //xAvger = simple_moving_averager(avgDepth);
-        //yAvger = simple_moving_averager(avgDepth);
         console.log('dsrelease....');
 
         jQuery('#cursor').css('opacity', 0.5);
@@ -352,8 +341,6 @@ function runEverything() {
         jQuery('#fileCursor').empty().append(jQuery('#'+BrowseSelection.get_selected_files()[0].get_div().id).find('.icon').clone());
         jQuery('#fileCursor').show();
         jQuery('.kinectArrow').show();
-        //xAvger = stationary_number(jQuery("#cursor").css('left'));
-        //yAvger = stationary_number(jQuery("#cursor").css('top'));
         console.log('dsPUSH');
         jQuery('#cursor').css('opacity', 0.8);
         jQuery("#cursor").css('width', cursorWidth * 1.2);
