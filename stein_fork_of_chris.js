@@ -1,12 +1,27 @@
 console.log('dstime to start loading things!');
+
+//constants
 var ZIGFU_FULL_URL = 'https://dl.dropbox.com/s/q1wudh4xu7man9m/zig-full.js?dl=1';
 var LOADING_ANIMATED_GIF = 'https://dl.dropbox.com/s/jd57hlkkmpey86m/dbx_animation.gif?dl=1'
 
 var TOP_OFFSET = 127;
 var LEFT_OFFSET = 180;
 var avgDepth = 6;
-var isPushed = false;
 var cursorWidth = 15;
+
+//state variables
+var isPushed = false;
+var usesCursor = true;
+
+/*
+var UI_MODES = {
+    PUSHED = 0;
+    UNPUSHED = 1;
+    NO_CURSOR = 2;
+    PREVIEW_NO_CURSOR = 3;
+    PREVIEW_CURSOR = 4;
+}
+*/
 
 var codexStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 var codexInt = [];
@@ -70,18 +85,21 @@ function runEverything() {
     jQuery('body').append(cursorDiv);
 
     // add some pop-up shit. super hax
-    jQuery('#cursor').append('<div id=\"leftarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:-170px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:18px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"uparrow\" class=\"kinectArrow\" style=\"position:absolute; top:-170px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"rightarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:80px;\"><img src=\"https://dl.dropbox.com/s/32kltg8ooibjmx8/rightarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:40px; left:55px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"downarrow\" class=\"kinectArrow\" style=\"position:absolute; top:80px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/8pfm4whijw18vw8/downarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"motivator\" class=\"kinectArrow\" style=\"position:absolute; top:-40px; left:-40px; font-weight:bold; font-size:30px; text-align:center;\"> THROW THE FILE! </div>');
+    jQuery('#cursor').append('<div id=\"leftarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:-170px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:18px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"uparrow\" class=\"kinectArrow\" style=\"position:absolute; top:-170px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/jz7cqddt2nchewt/arrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"rightarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:80px;\"><img src=\"https://dl.dropbox.com/s/32kltg8ooibjmx8/rightarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:40px; left:55px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"downarrow\" class=\"kinectArrow\" style=\"position:absolute; top:80px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/8pfm4whijw18vw8/downarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"motivator\" class=\"kinectArrow\" style=\"position:absolute; top:-40px; left:-40px; font-weight:bold; font-size:30px; text-align:center;\"> THROW THE FILE! </div>');
     jQuery('.kinectArrow').css('opacity', 0.6).hide();
     jQuery('body').append(jQuery('<div>')
         .css('position', 'fixed')
         .css('height', cursorWidth + 'px')
         .css('z-index', 65536).attr('id', 'fileCursor'));
     jQuery('#fileCursor').hide();
+    if (!usesCursor){
+        jQuery('#cursor').hide();
+    }
 
     xAvger = simple_moving_averager(avgDepth);
     yAvger = simple_moving_averager(avgDepth);
     isCursorMoving = true;
-    scrollLimiter = Limiter(500);
+    scrollLimiter = Limiter(200);
     swipeLimiter = Limiter(500);
 
     c.addEventListener('click', clickFunc);
@@ -229,6 +247,14 @@ function topAction(){
     console.log('topaction');
 }
 
+function swipeLeftAction(){
+    console.log('swipeLeftAction');
+}
+
+function swipeRightAction(){
+    console.log('swipeRightAction');
+}
+
 function lingerify(e){
     var ot = jQuery('#cursor').css('top');
     var ol = jQuery('#cursor').css('left');
@@ -250,7 +276,7 @@ function lingerify(e){
     }, 2000);
 }
 
-function handlePush(x, y){
+function handlePushedMove(x, y){
     jQuery("#fileCursor").css('left', x + "px");
     jQuery("#fileCursor").css('top', y + "px");
 
@@ -302,17 +328,11 @@ function handlePush(x, y){
     }
 }
 
-function moveHandler(cursor) {
-    var x = xAvger(getX(c));
-    var y = yAvger(getY(c));
-    //console.log('rx ry x y bottom top', Math.floor(getX(c)), Math.floor(getY(c)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
-    if (isPushed){
-        handlePush(x, y);
-        return;
+function handleUnpushedMove(x, y, visible_cursor){
+    if (visible_cursor){
+        jQuery("#cursor").css('left', x + "px");
+        jQuery("#cursor").css('top', y + "px");
     }
-    jQuery("#cursor").css('left', x + "px");
-    jQuery("#cursor").css('top', y + "px");
-
     cursorOver = jQuery(document.elementFromPoint(x - 3, y - 3)); //scoot over and up so we don't select the cursor
     browseFileParent = cursorOver.closest('.browse-file');
 
@@ -344,6 +364,46 @@ function moveHandler(cursor) {
     }
 }
 
+function handleFileMove(cur, visible_cursor){
+    var sfs = BrowseSelection.get_selected_files();
+    var next_index = 0;
+    if (sfs.length > 0) {
+        var selected_file = sfs[0];
+        var rank = selected_file.sort_rank;
+        if (cur.y < .1) {
+            next_index = Math.max(0, rank - 1);
+        } else if (cur.y > .9) {
+            next_index = Math.min(Browse.files.length, rank + 1);
+        } else {
+            next_index = rank;
+        }
+    }
+    scrollLimiter.doIfCan(function() {
+        Browse.scrollTo(Browse.files[next_index].get_div());
+        BrowseSelection.set_selected_files(Browse.files[next_index]);
+    });
+}
+
+function moveHandler(cursor) {
+    var x = xAvger(getX(cursor));
+    var y = yAvger(getY(cursor));
+    //console.log('rx ry x y bottom top', Math.floor(getX(c)), Math.floor(getY(c)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
+    if (DropboxActions.is_preview_active()){
+
+    } else {
+        if (usesCursor){
+            if (isPushed){
+                handlePushedMove(x, y);
+                return;
+            } else {
+                handleUnpushedMove(x, y, true);
+            }
+        } else {
+            handleFileMove(cursor, false);
+        }
+    }
+}
+
 function clickFunc(c) {
     console.log("CLICKETY-CLACK CLACK!");
     var xpos = c.x * window.innerWidth;
@@ -351,6 +411,7 @@ function clickFunc(c) {
 }
 
 function releaseFunc(c) {
+    if (!usesCursor) return;
     isPushed = false;
     jQuery('.kinectArrow').hide();
     jQuery('#fileCursor').hide();
@@ -362,6 +423,7 @@ function releaseFunc(c) {
 }
 
 function pushFunc(c){
+    if (!usesCursor) return;
     isPushed = true;
 
     jQuery('#fileCursor').empty().append(jQuery('#'+BrowseSelection.get_selected_files()[0].get_div().id).find('.icon').clone());
@@ -373,7 +435,7 @@ function pushFunc(c){
     jQuery("#cursor").css('height', cursorWidth * 1.2);
 }
 
-DropboxActions = {
+var DropboxActions = {
     clipboard : 'undefined',
     delete_selected : function() {
         FileOps.do_bulk_delete(BrowseSelection.get_selected_files());
