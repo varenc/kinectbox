@@ -363,6 +363,7 @@ function clickFunc(c) {
 }
 
 function releaseFunc(c) {
+    if (!usesCursor) return;
     isPushed = false;
     jQuery('.kinectArrow').hide();
     jQuery('#fileCursor').hide();
@@ -374,6 +375,7 @@ function releaseFunc(c) {
 }
 
 function pushFunc(c){
+    if (!usesCursor) return;
     isPushed = true;
 
     jQuery('#fileCursor').empty().append(jQuery('#'+BrowseSelection.get_selected_files()[0].get_div().id).find('.icon').clone());
