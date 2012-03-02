@@ -1,3 +1,6 @@
+
+var SWIPE_LIMIT = 700; //ms
+var FADER_SIZE = 250;
 kinectbox = function(){
 
 console.log('dstime to start loading things!');
@@ -8,7 +11,6 @@ var LOADING_ANIMATED_GIF = 'https://dl.dropbox.com/s/jd57hlkkmpey86m/dbx_animati
 
 var TOP_OFFSET = 127;
 var LEFT_OFFSET = 180;
-var SWIPE_LIMIT = 700; //ms
 var avgDepth = 6;
 var cursorWidth = 15;
 var currentPath = [];
