@@ -110,9 +110,9 @@ function runEverything() {
 
     //setup video
     vidcontainer.innerHTML = '<div id=\"canvasCont\"><div id=\"depthCan\"><canvas style=\"width:100%; height:100%;\" id=\"depth\" width=\"160\" height=\"120\"></canvas></div></div>';
-    jQuery('#main-nav').append('<div id=\"waveTell\">WAVE TO GET FOCUS</div>');
+    jQuery('#main-nav').append('<div id=\"waveTell\">LOST FOCUS<br>wave to center cursor</div>');
     jQuery('#waveTell').css('position', 'relative')
-        .css('top', '-112px')
+        .css('top', '-127px')
         .css('font-weight', 'bold')
         .css('color', 'white')
         .css('text-align', 'center');
