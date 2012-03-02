@@ -11,7 +11,7 @@ var cursorWidth = 15;
 
 //state variables
 var isPushed = false;
-var usesCursor = true;
+var usesCursor = false;
 
 /*
 var UI_MODES = {
@@ -257,7 +257,6 @@ function swipeRightAction(){
 function lingerify(e){
     var ot = jQuery('#cursor').css('top');
     var ol = jQuery('#cursor').css('left');
-    console.log(ot, ol);
     var ne = e.clone().css('left', ot)
                 .css('top', ol)
                 .css('opacity', 1)
@@ -414,7 +413,6 @@ function releaseFunc(c) {
     isPushed = false;
     jQuery('.kinectArrow').hide();
     jQuery('#fileCursor').hide();
-    console.log('dsrelease....');
 
     jQuery('#cursor').css('opacity', 0.5);
     jQuery("#cursor").css('width', cursorWidth);
@@ -428,7 +426,7 @@ function pushFunc(c){
     jQuery('#fileCursor').empty().append(jQuery('#'+BrowseSelection.get_selected_files()[0].get_div().id).find('.icon').clone());
     jQuery('#fileCursor').show();
     jQuery('.kinectArrow').show();
-    console.log('dsPUSH');
+    //console.log('dsPUSH');
     jQuery('#cursor').css('opacity', 0.8);
     jQuery("#cursor").css('width', cursorWidth * 1.2);
     jQuery("#cursor").css('height', cursorWidth * 1.2);
