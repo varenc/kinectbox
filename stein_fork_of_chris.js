@@ -11,7 +11,7 @@ var cursorWidth = 15;
 
 //state variables
 var isPushed = false;
-var usesCursor = false;
+var usesCursor = true;
 
 /*
 var UI_MODES = {
@@ -99,7 +99,7 @@ function runEverything() {
     xAvger = simple_moving_averager(avgDepth);
     yAvger = simple_moving_averager(avgDepth);
     isCursorMoving = true;
-    scrollLimiter = Limiter(500);
+    scrollLimiter = Limiter(200);
 
     c.addEventListener('click', clickFunc);
     c.addEventListener('move', moveHandler);
@@ -337,25 +337,28 @@ function handleUnpushedMove(x, y, visible_cursor){
 }
 
 function handleFileMove(cur, visible_cursor){
-    if (BrowseSelection.get_selected_files() != []) {
-        var selected_file = BrowseSelection.get_selected_files()[0];
+    var sfs = BrowseSelection.get_selected_files();
+    var next_index = 0;
+    if (sfs.length > 0) {
+        var selected_file = sfs[0];
         var rank = selected_file.sort_rank;
-        var next_index;
-        if (cur.y < .3) {
+        if (cur.y < .1) {
             next_index = Math.max(0, rank - 1);
-        } else if (cur.y > .7) {
-            next_index = Math.max(0, rank - 0);
+        } else if (cur.y > .9) {
+            next_index = Math.min(Browse.files.length, rank + 1);
         } else {
             next_index = rank;
         }
     }
-    Browse.scrollTo(Browse.files[next_index - 1].get_div());
-    BrowseSelection.set_selected_files(Browse.files[next_index]);
+    scrollLimiter.doIfCan(function() {
+        Browse.scrollTo(Browse.files[next_index].get_div());
+        BrowseSelection.set_selected_files(Browse.files[next_index]);
+    });
 }
 
 function moveHandler(cursor) {
-    var x = xAvger(getX(c));
-    var y = yAvger(getY(c));
+    var x = xAvger(getX(cursor));
+    var y = yAvger(getY(cursor));
     //console.log('rx ry x y bottom top', Math.floor(getX(c)), Math.floor(getY(c)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
     if (DropboxActions.is_preview_active()){
 
@@ -368,7 +371,7 @@ function moveHandler(cursor) {
                 handleUnpushedMove(x, y, true);
             }
         } else {
-            handleFileMove(c, false);
+            handleFileMove(cursor, false);
         }
     }
 }
