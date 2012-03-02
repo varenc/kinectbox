@@ -446,11 +446,25 @@ var DropboxActions = {
         FileOps.do_bulk_move(clipboard, BrowseSelection.get_selected_files()[0].fq_path);
     },
     open_selected : function() {
-        console.log("open selected!");
-        elem = jQuery(BrowseSelection.get_selected_files()[0].get_div()).find('.filename-link')[0]
-        console.log("elem to open ---> ", elem);
-        elem.simulate('click');
-        //BrowseURL.set_path_url(BrowseSelection.get_selected_files()[0].ns_id, BrowseSelection.get_selected_files()[0].ns_path);
+        var selection = BrowseSelection.get_selected_files();
+        if (1 == selection.length) {
+            var file = selection[0];
+            if (file.dir) {
+                if (Browse.keyboard_nav) {
+                    Browse.select_index = 0; // select the first file in the new dir
+                }
+                Browse.open_folder(file);
+            } else if (file.preview_type) {
+                BrowseUtil.filepreview_from_selected(file);
+            } else {
+                //WTF DO I DO NOW?????
+                //not a directory or file preview
+                return;
+            }
+        }
+        else {
+            alert("YOU SELECTED MUTLIPLE FILES YOU FUCK");
+        }
     },
     go_up_directory : function() {
         //this will escape gallery view AND go up a directory
