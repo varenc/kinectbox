@@ -133,43 +133,45 @@ function runEverything() {
     var swipeDetector = zig.controls.SwipeDetector();
     swipeDetector.addEventListener('swipeup', function(pd) {
         //nothing
-        //console.log('SwipeDetector: Swipe Up');
+        //console.log('SwipeDetector: Swipe Up');f
     });
     swipeDetector.addEventListener('swipedown', function(pd) {
+        if (usesCursor) { return; }
         swipeLimiter.doIfCan(function() {
-        console.log('SwipeDetector: Swipe Down');
-        //return;
-        if (DropboxActions.is_preview_active()) {
-            DropboxActions.close_preview();
-        }
+            console.log('SwipeDetector: Swipe Down');
+            if (DropboxActions.is_preview_active()) {
+                DropboxActions.close_preview();
+            }
         });
     });
     swipeDetector.addEventListener('swipeleft', function(pd) {
+        if (usesCursor) { return; }
         swipeLimiter.doIfCan(function() {
-        console.log('SwipeDetector: Swipe Left');
-        //return;
-        if (DropboxActions.is_preview_active()) {
-            DropboxActions.next_preview();
-        }
-        else {
-            DropboxActions.go_up_directory();
-        }
+            console.log('SwipeDetector: Swipe Left');
+            if (DropboxActions.is_preview_active()) {
+                console.log('next preview!');
+                DropboxActions.next_preview();
+            }
+            else {
+                console.log('open selected!');
+                DropboxActions.open_selected();
+            }
         });
     });
     swipeDetector.addEventListener('swiperight', function(pd) {
+        if (usesCursor) { return; }
         swipeLimiter.doIfCan(function() {
-        console.log('SwipeDetector: Swipe Right');
-        //return;
-        if (DropboxActions.is_preview_active()) {
-            DropboxActions.prev_preview();
-        }
-        else {
-            DropboxActions.open_selected();
-        }
+            console.log('SwipeDetector: Swipe Right');
+            if (DropboxActions.is_preview_active()) {
+                DropboxActions.prev_preview();
+            }
+            else {
+                DropboxActions.go_up_directory();
+            }
         });
     });
     swipeDetector.addEventListener('swipe', function(dir) {
-        console.log('SwipeDetector: Swipe direction: ' + dir);
+        //console.log('SwipeDetector: Swipe direction: ' + dir);
     });
 
     zig.singleUserSession.addListener(swipeDetector);
@@ -473,7 +475,11 @@ var DropboxActions = {
         FileOps.do_bulk_move(clipboard, BrowseSelection.get_selected_files()[0].fq_path);
     },
     open_selected : function() {
-        jQuery(BrowseSelection.get_selected_files()[0].get_div()).find('.filename-link')[0].simulate('click');
+        console.log("open selected!");
+        elem = jQuery(BrowseSelection.get_selected_files()[0].get_div()).find('.filename-link')[0]
+        console.log("elem to open ---> ", elem);
+        elem.simulate('click');
+        //BrowseURL.set_path_url(BrowseSelection.get_selected_files()[0].ns_id, BrowseSelection.get_selected_files()[0].ns_path);
     },
     go_up_directory : function() {
         //this will escape gallery view AND go up a directory
