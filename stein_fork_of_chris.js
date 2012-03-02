@@ -116,7 +116,7 @@ function runEverything() {
     swipeDetector.addEventListener('swipedown', function(pd) {
         swipeLimiter.doIfCan(function() {
         console.log('SwipeDetector: Swipe Down');
-        return;
+        //return;
         if (DropboxActions.is_preview_active()) {
             DropboxActions.close_preview();
         }
@@ -125,7 +125,7 @@ function runEverything() {
     swipeDetector.addEventListener('swipeleft', function(pd) {
         swipeLimiter.doIfCan(function() {
         console.log('SwipeDetector: Swipe Left');
-        return;
+        //return;
         if (DropboxActions.is_preview_active()) {
             DropboxActions.next_preview();
         }
@@ -137,8 +137,7 @@ function runEverything() {
     swipeDetector.addEventListener('swiperight', function(pd) {
         swipeLimiter.doIfCan(function() {
         console.log('SwipeDetector: Swipe Right');
-        swipeLimiter.doIfCan(function() {
-        return;
+        //return;
         if (DropboxActions.is_preview_active()) {
             DropboxActions.prev_preview();
         }
