@@ -97,9 +97,9 @@ function Events() {
 			if (undefined !== specificListener && specificListener != listener) return;
 
 			if (listener.hasOwnProperty(eventName)) {
-				try {
+				//try {
 					listener[eventName].call(listener, arg);
-				} catch (e) { console.log("Error calling callback for " + eventName + ": " + e); }
+				//} catch (e) { console.log("Error calling callback for " + eventName + ": " + e); }
 			}
 		});
 
@@ -107,12 +107,12 @@ function Events() {
 		if (events.hasOwnProperty(eventName)) {
 			events[eventName].forEach(function(cb) {
 				if (undefined !== specificListener && specificListener != cb) return;
-				try {
+				//try {
 					cb.call(null, arg);
-				} catch (e) {
-					console.log("Error calling callback for " + eventName + ": " + e);
-					console.log(get_stack_rep());
-				}
+				//} catch (e) {
+				//	console.log("Error calling callback for " + eventName + ": " + e);
+				//	console.log(get_stack_rep());
+				//}
 			});
 		}
 	}
