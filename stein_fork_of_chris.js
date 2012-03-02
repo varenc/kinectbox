@@ -11,7 +11,7 @@ var cursorWidth = 15;
 
 //state variables
 var isPushed = false;
-var usesCursor = true;
+var usesCursor = false;
 
 /*
 var UI_MODES = {
