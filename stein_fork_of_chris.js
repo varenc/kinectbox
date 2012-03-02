@@ -55,11 +55,13 @@ function toggleProMode() {
             .css('backgroundColor', '#1f75cc')
             .text('EDIT MODE');
         jQuery('#cursor').show();
+        jQuery('#y-indicator').hide();
     } else {
         jQuery('#kinectState')
             .css('backgroundColor', '#559944')
             .text('BROWSE MODE');
         jQuery('#cursor').hide();
+        jQuery('#y-indicator').show();
     }
 }
 
@@ -87,16 +89,21 @@ function runEverything() {
         .css('color', 'white')
         .click(toggleProMode));
 
-    yindicator = jQuery('<div id="y-indicator" style="position: relative; \
-        top: -184px; height: 112px; width: 15px;  left: -30px; border-radius: 9px; \
-        border: 3px solid green; background: #Aaccee;"> \
-        <div id="y-circle" style="background: green; width: 11px; \
-       height: 11px; border-radius: 5px; margin-left: 2px; top: 25px; \
-       position: relative;"></div></div>');
+    yindicator = jQuery('<div id="y-indicator" style="position: absolute; \
+top: 213px; height: 112px; width: 15px;  left: -26px; border-radius: 9px; \
+border: 1px solid green; background: #Aaccee; display: block;"> \
+<div id="y-circle" style="background: green; width: 11px; \
+height: 11px; border-radius: 5px; margin-left: 2px; top: 25px; \
+position: relative;"></div><div id="y-bar1" style="height: 2px; background: black; top: 16px; position: absolute; width: 15px;"></div> \
+<div id="y-bar2" style="height: 2px; background: black; top: 34px; position: absolute; width: 15px;"></div> \
+<div id="y-bar3" style="height: 2px; background: black; top: 74px; position: absolute; width: 15px;"></div> \
+<div id="y-bar4" style="height: 2px; background: black; top: 96px; position: absolute; width: 15px;"></div> \
+</div>');
 
-    jQuery('#page-sidebar').append(yindicator);
+    jQuery('#main-nav').append(yindicator);
 
     if (usesCursor){
+        jQuery('#y-indicator').hide();
         jQuery('#kinectState')
             .css('backgroundColor', '#1f75cc')
             .text('EDIT MODE');
@@ -170,6 +177,15 @@ function runEverything() {
     swipeDetector.addEventListener('swipeup', function(pd) {
         //nothing
         //console.log('SwipeDetector: Swipe Up');f
+    });
+    swipeDetector.addEventListener('swipeup', function(pd) {
+        if (usesCursor && !DropboxActions.is_preview_active()) { return; }
+        swipeLimiter.doIfCan(function() {
+            console.log('SwipeDetector: Swipe Up up up!');
+            if (DropboxActions.is_preview_active()) {
+                DropboxActions.click_video(); //will do nothing if no video present
+            }
+        });
     });
     swipeDetector.addEventListener('swipedown', function(pd) {
         if (usesCursor && !DropboxActions.is_preview_active()) { return; }
@@ -572,6 +588,12 @@ var DropboxActions = {
     },
     is_preview_active : function() {
         return FilePreviewModal.shown;
+    },
+    click_video : function() {
+        v = $$('.video-player')[0];
+        if (typeof v != 'undefined') {
+            v.simulate('click');
+        }
     }
 };
 
