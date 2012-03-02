@@ -86,6 +86,16 @@ function runEverything() {
         .css('font-weight', 'bold')
         .css('color', 'white')
         .click(toggleProMode));
+
+    yindicator = jQuery('<div id="y-indicator" style="position: relative; \
+        top: -184px; height: 112px; width: 15px;  left: -30px; border-radius: 9px; \
+        border: 3px solid green; background: #Aaccee;"> \
+        <div id="y-circle" style="background: green; width: 11px; \
+       height: 11px; border-radius: 5px; margin-left: 2px; top: 25px; \
+       position: relative;"></div></div>');
+
+    jQuery('#page-sidebar').append(yindicator);
+
     if (usesCursor){
         jQuery('#kinectState')
             .css('backgroundColor', '#1f75cc')
@@ -448,6 +458,7 @@ function handleFileMove(cur, visible_cursor){
             BrowseSelection.set_selected_files(Browse.files[next_index]);
         });
     }
+    jQuery('#y-circle').css('top',cur.y*100+'px');
 }
 
 function moveHandler(cursor) {
