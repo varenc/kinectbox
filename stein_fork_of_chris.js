@@ -144,7 +144,7 @@ function runEverything() {
     dmLimiter = Limiter(50);
     slowScrollLimiter = Limiter(500);
     scrollLimiter = Limiter(150);
-    swipeLimiter = Limiter(1000);
+    swipeLimiter = Limiter(1500);
 
     theCursor.addEventListener('click', clickFunc);
     theCursor.addEventListener('move', moveHandler);
@@ -461,6 +461,7 @@ function moveHandler(cursor) {
             }
         } else {
             handleFileMove(cursor, false);
+            //handleUnpushedMove(400, y, true);
         }
     }
 }
@@ -528,6 +529,7 @@ var DropboxActions = {
                 Browse.open_folder(file);
             } else if (file.preview_type) {
                 BrowseUtil.filepreview_from_selected(file);
+                jQuery('#cursor').css('left', '5px').css('top', '5px');
             } else {
                 //WTF DO I DO NOW?????
                 //not a directory or file preview
