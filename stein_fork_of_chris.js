@@ -114,18 +114,18 @@ function runEverything() {
         //console.log('SwipeDetector: Swipe Up');
     });
     swipeDetector.addEventListener('swipedown', function(pd) {
+        if (usesCursor) { return; }
         swipeLimiter.doIfCan(function() {
         console.log('SwipeDetector: Swipe Down');
-        //return;
         if (DropboxActions.is_preview_active()) {
             DropboxActions.close_preview();
         }
         });
     });
     swipeDetector.addEventListener('swipeleft', function(pd) {
+        if (usesCursor) { return; }
         swipeLimiter.doIfCan(function() {
         console.log('SwipeDetector: Swipe Left');
-        //return;
         if (DropboxActions.is_preview_active()) {
             DropboxActions.next_preview();
         }
@@ -135,9 +135,9 @@ function runEverything() {
         });
     });
     swipeDetector.addEventListener('swiperight', function(pd) {
+        if (usesCursor) { return; }
         swipeLimiter.doIfCan(function() {
         console.log('SwipeDetector: Swipe Right');
-        //return;
         if (DropboxActions.is_preview_active()) {
             DropboxActions.prev_preview();
         }
@@ -147,7 +147,7 @@ function runEverything() {
         });
     });
     swipeDetector.addEventListener('swipe', function(dir) {
-        console.log('SwipeDetector: Swipe direction: ' + dir);
+        //console.log('SwipeDetector: Swipe direction: ' + dir);
     });
 
     zig.singleUserSession.addListener(swipeDetector);
