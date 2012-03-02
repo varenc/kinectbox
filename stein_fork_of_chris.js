@@ -29,7 +29,7 @@ var UI_MODES = {
 var codexStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 var codexInt = [];
 
-var xAvger, yAvger, isCursorMoving, scrollLimiter, theCursor;
+var xAvger, yAvger, isCursorMoving, scrollLimiter, dmLimiter, theCursor, dmLimiter;
 
 for(var i = 0; i < 256; i++) {
     var idx = codexStr.indexOf(String.fromCharCode(i));
@@ -48,25 +48,19 @@ var vidcontainer = document.getElementById('main-nav').appendChild(document.crea
     vidcontainer.style.width = '150px';
     vidcontainer.innerHTML = '<img src=\"'+LOADING_ANIMATED_GIF+'\" />';
 
-function simulatedClick(){
-    
-}
-
-function openSelectedFile(){
-    
-}
-
-function enterSelectedFolder(){
-    var currentSelection = BrowseSelection.get_selected_files()[0];
-    BrowseURL.set_path_url(currentSelection.ns_id, currentSelection.ns_path, true);
-    currentPath = currentPath.concat([[currentSelection.ns_id, currentSelection.ns_path]]);
-}
-
-function upFolder(){
-    var upwardPath = currentPath[currentPath.length - 1];
-    if (typeof upwardPath == 'undefined') return;
-    currentPath.splice(currentPath.length-1, 1);
-    BrowseURL.set_path_url(upwardPath.ns_id, upwardPath.ns_path, true);
+function toggleProMode() {
+    usesCursor = !usesCursor;
+    if (usesCursor){
+        jQuery('#kinectState')
+            .css('backgroundColor', 'blue')
+            .text('EDIT MODE');
+        jQuery('#cursor').show();
+    } else {
+        jQuery('#kinectState')
+            .css('backgroundColor', '#88CC77')
+            .text('BROWSE MODE');
+        jQuery('#cursor').show();
+    }
 }
 
 function killZigfuStuff() {
@@ -81,6 +75,28 @@ function runEverything() {
     var plugin, pluginContainer
     console.log("running everything");
     killZigfuStuff();
+
+    jQuery('#main-nav').append(jQuery('<div id=\"kinectState\" />')
+        .css('border-radius', 10)
+        .css('height', 25)
+        .css('width', 150)
+        .css('valign', 'middle')
+        .css('text-align', 'center')
+        .css('font-size', '18px')
+        .css('font-weight', 'bold')
+        .css('color', 'white')
+        .click(toggleProMode));
+    if (usesCursor){
+        jQuery('#kinectState')
+            .css('backgroundColor', 'blue')
+            .text('EDIT MODE');
+        jQuery('#cursor').show()
+    } else {
+        jQuery('#kinectState')
+            .css('backgroundColor', '#88CC77')
+            .text('BROWSE MODE');
+        jQuery('#cursor').hide()
+    }
 
     //setup video
     vidcontainer.innerHTML = '<div id=\"canvasCont\"><div id=\"depthCan\"><canvas style=\"width:100%; height:100%;\" id=\"depth\" width=\"160\" height=\"120\"></canvas></div></div>';
@@ -125,9 +141,10 @@ function runEverything() {
     yAvger = simple_moving_averager(avgDepth);
     isCursorMoving = true;
 
+    dmLimiter = Limiter(50);
     slowScrollLimiter = Limiter(500);
     scrollLimiter = Limiter(150);
-    swipeLimiter = Limiter(500);
+    swipeLimiter = Limiter(1000);
 
     theCursor.addEventListener('click', clickFunc);
     theCursor.addEventListener('move', moveHandler);
@@ -216,19 +233,21 @@ var Base64 =
 }
 
 function drawDM(plugin) {
-    var dm = plugin.depthMap;
-    if (dm.length === 0) return;
-    var canv = document.getElementById('depth');
-    var ctx = canv.getContext('2d');
-    var pix = ctx.createImageData(160,120);
-    var data = pix.data;
-    var srcData = Base64.decode(dm);
-    for(var i = 0; i < 160*120; i++) {
-        data[i*4 + 1] = (10-srcData[i*2+1]) << 5;
-        data[i*4 + 2] = 0;
-        data[i*4 + 3] = saturate;
-    }
-    ctx.putImageData(pix, 0, 0);
+    dmLimiter.doIfCan(function () {
+        var dm = plugin.depthMap;
+        if (dm.length === 0) return;
+        var canv = document.getElementById('depth');
+        var ctx = canv.getContext('2d');
+        var pix = ctx.createImageData(160,120);
+        var data = pix.data;
+        var srcData = Base64.decode(dm);
+        for(var i = 0; i < 160*120; i++) {
+            data[i*4 + 1] = (10-srcData[i*2+1]) << 5;
+            data[i*4 + 2] = 0;
+            data[i*4 + 3] = saturate;
+        }
+        ctx.putImageData(pix, 0, 0);
+    });
 }
 
 function sessionStartFunc(focusPosition) {
@@ -516,7 +535,8 @@ var DropboxActions = {
             }
         }
         else {
-            alert("YOU SELECTED MUTLIPLE FILES YOU FUCK");
+            console.log("YOU SELECTED MUTLIPLE FILES YOU FUCK");
+            BrowseSelection.set_selected_files([]);
         }
     },
     go_up_directory : function() {
