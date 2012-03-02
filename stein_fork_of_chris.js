@@ -8,7 +8,7 @@ var LOADING_ANIMATED_GIF = 'https://dl.dropbox.com/s/jd57hlkkmpey86m/dbx_animati
 
 var TOP_OFFSET = 127;
 var LEFT_OFFSET = 180;
-var SWIPE_LIMIT = 30; //ms
+var SWIPE_LIMIT = 700; //ms
 var avgDepth = 6;
 var cursorWidth = 15;
 var currentPath = [];
@@ -199,7 +199,7 @@ function runEverything() {
         //console.log('SwipeDetector: Swipe Up');f
     });
     swipeDetector.addEventListener('swipeup', function(pd) {
-        if (usesCursor && !DropboxActions.is_preview_active()) { return; }
+        if (!DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
             console.log('SwipeDetector: Swipe Up up up!', nnn);
             if (DropboxActions.is_preview_active()) {
@@ -210,7 +210,7 @@ function runEverything() {
         });
     });
     swipeDetector.addEventListener('swipedown', function(pd) {
-        if (usesCursor && !DropboxActions.is_preview_active()) { return; }
+        if (!DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
             console.log('SwipeDetector: Swipe Down', nnn);
             if (DropboxActions.is_preview_active()) {
