@@ -4,7 +4,6 @@
 //NOTE: block comments fuck the minification hax
 //javascript:(
 console.log('dstime to start loading things!');
-var $jj; // make this global..
 var ZIGFU_FULL_URL = 'https://dl.dropbox.com/s/q1wudh4xu7man9m/zig-full.js?dl=1';
 var LOADING_ANIMATED_GIF = 'https://dl.dropbox.com/s/jd57hlkkmpey86m/dbx_animation.gif?dl=1'
 
