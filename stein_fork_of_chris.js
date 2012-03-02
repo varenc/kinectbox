@@ -345,7 +345,7 @@ function pushFunc(c){
     jQuery("#cursor").css('height', cursorWidth * 1.2);
 }
 
-DropboxActions = {
+var DropboxActions = {
     clipboard : 'undefined',
     delete_selected : function() {
         FileOps.do_bulk_delete(BrowseSelection.get_selected_files());
