@@ -450,9 +450,8 @@ var DropboxActions = {
         if (1 == selection.length) {
             var file = selection[0];
             if (file.dir) {
-                if (Browse.keyboard_nav) {
-                    Browse.select_index = 0; // select the first file in the new dir
-                }
+                //maaaaaaaaaaaaybe?
+                Browse.select_index = 0; // select the first file in the new dir
                 Browse.open_folder(file);
             } else if (file.preview_type) {
                 BrowseUtil.filepreview_from_selected(file);
