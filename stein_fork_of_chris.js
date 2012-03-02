@@ -82,24 +82,52 @@ function runEverything() {
     yAvger = simple_moving_averager(avgDepth);
     isCursorMoving = true;
     scrollLimiter = Limiter(500);
+    swipeLimiter = Limiter(500);
 
     c.addEventListener('click', clickFunc);
     c.addEventListener('move', moveHandler);
     c.addEventListener('push', pushFunc);
     c.addEventListener('release', releaseFunc);
 
+
     var swipeDetector = zig.controls.SwipeDetector();
     swipeDetector.addEventListener('swipeup', function(pd) {
-        console.log('SwipeDetector: Swipe Up');
+        //nothing
+        //console.log('SwipeDetector: Swipe Up');
     });
     swipeDetector.addEventListener('swipedown', function(pd) {
+        swipeLimiter.doIfCan(function() {
         console.log('SwipeDetector: Swipe Down');
+        return;
+        if (DropboxActions.is_preview_active()) {
+            DropboxActions.close_preview();
+        }
+        });
     });
     swipeDetector.addEventListener('swipeleft', function(pd) {
+        swipeLimiter.doIfCan(function() {
         console.log('SwipeDetector: Swipe Left');
+        return;
+        if (DropboxActions.is_preview_active()) {
+            DropboxActions.next_preview();
+        }
+        else {
+            DropboxActions.go_up_directory();
+        }
+        });
     });
     swipeDetector.addEventListener('swiperight', function(pd) {
+        swipeLimiter.doIfCan(function() {
         console.log('SwipeDetector: Swipe Right');
+        swipeLimiter.doIfCan(function() {
+        return;
+        if (DropboxActions.is_preview_active()) {
+            DropboxActions.prev_preview();
+        }
+        else {
+            DropboxActions.open_selected();
+        }
+        });
     });
     swipeDetector.addEventListener('swipe', function(dir) {
         console.log('SwipeDetector: Swipe direction: ' + dir);
