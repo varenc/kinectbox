@@ -651,11 +651,11 @@ function Limiter(maxFrequency, verbose) {
             markframe();
             now = (new Date()).getTime();
             if (lastDone === undefined || (now - lastDone) > maxFrequency) {
-                if (verbose) console.log('--------------------doin it.');
+                if (verbose) console.log('--------------------doin it! ' + now);
                 lastDone = now;
                 xx();
             } else {
-                if (verbose) console.log('--------------------NOPE');
+                if (verbose) console.log('--------------------NOPE ' + now);
                 return;
             }
         }
