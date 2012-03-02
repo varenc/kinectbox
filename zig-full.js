@@ -433,7 +433,7 @@ function SteadyDetector(maxVariance) {
 //-----------------------------------------------------------------------------
 function Fader(orientation, size) {
 	// defaults
-	size = size || 450;
+	size = size || 250;//450;
 
 	// return object
 	var api = {
