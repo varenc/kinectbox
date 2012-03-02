@@ -34,6 +34,28 @@ eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
 // Helper objects
 //-----------------------------------------------------------------------------
 
+function get_stack_rep() {
+    var out = [];
+    var seen = {};
+    var caller = arguments.callee.caller;
+
+    while (caller) {
+
+        var fingerprint = fn_body(caller);
+
+        if (fingerprint in seen) {
+            break; // bail at the first sign of recursion
+        }
+
+        seen[fingerprint] = true;
+        out.unshift(fingerprint);
+        caller = caller.caller;
+    }
+
+    return out;
+}
+
+
 function Events() {
 	var events = {};
 	var listeners = [];	
@@ -87,7 +109,10 @@ function Events() {
 				if (undefined !== specificListener && specificListener != cb) return;
 				try {
 					cb.call(null, arg);
-				} catch (e) { console.log("Error calling callback for " + eventName + ": " + e); }
+				} catch (e) {
+					console.log("Error calling callback for " + eventName + ": " + e);
+					console.log(get_stack_rep());
+				}
 			});
 		}
 	}
