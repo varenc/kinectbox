@@ -8,13 +8,14 @@ var LOADING_ANIMATED_GIF = 'https://dl.dropbox.com/s/jd57hlkkmpey86m/dbx_animati
 
 var TOP_OFFSET = 127;
 var LEFT_OFFSET = 180;
+var SWIPE_LIMIT = 30; //ms
 var avgDepth = 6;
 var cursorWidth = 15;
 var currentPath = [];
 
 //state variables
 var isPushed = false;
-var usesCursor = true;
+var usesCursor = false;
 
 /*
 var UI_MODES = {
@@ -90,15 +91,13 @@ function runEverything() {
         .click(toggleProMode));
 
     yindicator = jQuery('<div id="y-indicator" style="position: absolute; \
-top: 213px; height: 112px; width: 15px;  left: -26px; border-radius: 9px; \
-border: 1px solid green; background: #Aaccee; display: block;"> \
-<div id="y-circle" style="background: green; width: 11px; \
-height: 11px; border-radius: 5px; margin-left: 2px; top: 25px; \
-position: relative;"></div><div id="y-bar1" style="height: 2px; background: black; top: 16px; position: absolute; width: 15px;"></div> \
-<div id="y-bar2" style="height: 2px; background: black; top: 34px; position: absolute; width: 15px;"></div> \
-<div id="y-bar3" style="height: 2px; background: black; top: 74px; position: absolute; width: 15px;"></div> \
-<div id="y-bar4" style="height: 2px; background: black; top: 96px; position: absolute; width: 15px;"></div> \
-</div>');
+                            top: 213px; height: 112px; width: 13px;  left: -26px; border-radius: 9px; \
+                            border: 1px solid green; background: #7b9; display: block; z-index:0;"> \
+                        <div id="y-circle" style="background: #380; width: 11px; height: 11px; z-index:4;\
+                            border-radius: 5px; margin-left: 1px; top: 25px; position: relative;"></div> \
+                        <div id="y-bar2" style="height: 74px; background: #9da; top: 16px; position: absolute; width: 13px; z-index:2;"></div> \
+                        <div id="y-bar3" style="height: 34px; background: #aec; top: 39px; position: absolute; width: 13px; z-index:3;"></div> \
+                        </div>');
 
     jQuery('#main-nav').append(yindicator);
 
@@ -148,7 +147,27 @@ position: relative;"></div><div id="y-bar1" style="height: 2px; background: blac
     jQuery('body').append(cursorDiv);
 
     // add some pop-up shit. super hax
-    jQuery('#cursor').append('<div id=\"leftarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:-170px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:18px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"uparrow\" class=\"kinectArrow\" style=\"position:absolute; top:-170px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/jz7cqddt2nchewt/arrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">Cut</div></div><div id=\"rightarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:80px;\"><img src=\"https://dl.dropbox.com/s/32kltg8ooibjmx8/rightarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:40px; left:55px; color:#fff; text-align:center; font-weight:bold;\">Open</div></div><div id=\"downarrow\" class=\"kinectArrow\" style=\"position:absolute; top:80px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/8pfm4whijw18vw8/downarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">Paste</div></div><div id=\"motivator\" class=\"kinectArrow\" style=\"position:absolute; top:-40px; left:-40px; font-weight:bold; font-size:30px; text-align:center;\"> THROW THE FILE! </div>');
+    jQuery('#cursor').append('<div id=\"leftarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:-170px;\">\
+                <img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" />\
+                <div style=\"position: absolute; top:36px; left:18px; color:#fff; font-size:15px; text-align:center; font-weight:bold;\">\
+                parent folder\
+            </div></div>\
+            <div id=\"uparrow\" class=\"kinectArrow\" style=\"position:absolute; top:-170px; left:-45px;\">\
+                <img src=\"https://dl.dropbox.com/s/jz7cqddt2nchewt/arrow.png?dl=1\" style=\"position: absolute;\" />\
+                <div style=\"position: absolute; top:36px; left:24px; color:#fff; font-size:15px; text-align:center; font-weight:bold;\">\
+                Cut\
+            </div></div>\
+            <div id=\"rightarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:80px;\">\
+                <img src=\"https://dl.dropbox.com/s/32kltg8ooibjmx8/rightarrow.png?dl=1\" style=\"position: absolute;\" />\
+                <div style=\"position: absolute; top:40px; left:55px; color:#fff; font-size:15px; text-align:center; font-weight:bold;\">\
+                Open\
+            </div></div>\
+            <div id=\"downarrow\" class=\"kinectArrow\" style=\"position:absolute; top:80px; left:-45px;\">\
+                <img src=\"https://dl.dropbox.com/s/8pfm4whijw18vw8/downarrow.png?dl=1\" style=\"position: absolute;\" />\
+                <div style=\"position: absolute; top:36px; left:24px; color:#fff; font-size:15px; text-align:center; font-weight:bold;\">\
+                Paste\
+            </div></div>\
+            <div id=\"motivator\" class=\"kinectArrow\" style=\"position:absolute; top:-40px; left:-40px; font-weight:bold; font-size:30px; text-align:center;\"> THROW THE FILE! </div>');
     jQuery('.kinectArrow').css('opacity', 0.6).hide();
     jQuery('body').append(jQuery('<div>')
         .css('position', 'fixed')
@@ -166,13 +185,14 @@ position: relative;"></div><div id="y-bar1" style="height: 2px; background: blac
     dmLimiter = Limiter(50);
     slowScrollLimiter = Limiter(500);
     scrollLimiter = Limiter(150);
-    swipeLimiter = Limiter(1500);
+    swipeLimiter = Limiter(SWIPE_LIMIT);
 
     theCursor.addEventListener('click', clickFunc);
     theCursor.addEventListener('move', moveHandler);
     theCursor.addEventListener('push', pushFunc);
     theCursor.addEventListener('release', releaseFunc);
 
+    var nnn = 0;
     var swipeDetector = zig.controls.SwipeDetector();
     swipeDetector.addEventListener('swipeup', function(pd) {
         //nothing
@@ -181,25 +201,29 @@ position: relative;"></div><div id="y-bar1" style="height: 2px; background: blac
     swipeDetector.addEventListener('swipeup', function(pd) {
         if (usesCursor && !DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
-            console.log('SwipeDetector: Swipe Up up up!');
+            console.log('SwipeDetector: Swipe Up up up!', nnn);
             if (DropboxActions.is_preview_active()) {
                 DropboxActions.click_video(); //will do nothing if no video present
             }
+            console.log('nnn', nnn);
+            nnn += 1;
         });
     });
     swipeDetector.addEventListener('swipedown', function(pd) {
         if (usesCursor && !DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
-            console.log('SwipeDetector: Swipe Down');
+            console.log('SwipeDetector: Swipe Down', nnn);
             if (DropboxActions.is_preview_active()) {
                 DropboxActions.close_preview();
             }
+            console.log('nnn', nnn);
+            nnn += 1;
         });
     });
     swipeDetector.addEventListener('swipeleft', function(pd) {
         if (usesCursor && !DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
-            console.log('SwipeDetector: Swipe Left');
+            console.log('SwipeDetector: Swipe Left', nnn);
             if (DropboxActions.is_preview_active()) {
                 console.log('next preview!');
                 DropboxActions.next_preview();
@@ -208,18 +232,22 @@ position: relative;"></div><div id="y-bar1" style="height: 2px; background: blac
                 console.log('open selected!');
                 DropboxActions.open_selected();
             }
+            console.log('nnn', nnn);
+            nnn += 1;
         });
     });
     swipeDetector.addEventListener('swiperight', function(pd) {
         if (usesCursor && !DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
-            console.log('SwipeDetector: Swipe Right');
+            console.log('SwipeDetector: Swipe Right', nnn);
             if (DropboxActions.is_preview_active()) {
                 DropboxActions.prev_preview();
             }
             else {
                 DropboxActions.go_up_directory();
             }
+            console.log('nnn', nnn);
+            nnn += 1;
         });
     });
     swipeDetector.addEventListener('swipe', function(dir) {
@@ -336,27 +364,6 @@ function swipeRightAction(){
     console.log('swipeRightAction');
 }
 
-/*
-function lingerify(e){
-    var ot = jQuery('#cursor').css('top');
-    var ol = jQuery('#cursor').css('left');
-    var ne = e.clone().css('left', ot)
-                .css('top', ol)
-                .css('opacity', 1)
-                .css('position', 'fixed')
-                .css('z-index', 65532)
-                .css('display', 'block')
-                .attr('id', 'tempElementThing');
-    ne.removeClass('kinectArrow');
-    jQuery('body').append(ne);
-    console.log(ne);
-    ne.animate({opacity: 1}, 1000);
-    setTimeout(function(){
-        console.log(ot, ol);
-        jQuery('#tempElementThing').remove();
-    }, 2000);
-}
-*/
 function handlePushedMove(x, y){
     jQuery("#fileCursor").css('left', x + "px");
     jQuery("#fileCursor").css('top', y + "px");
@@ -482,7 +489,7 @@ function moveHandler(cursor) {
     var y = yAvger(getY(cursor));
     //console.log('rx ry x y bottom top', Math.floor(getX(theCursor)), Math.floor(getY(theCursor)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
     if (DropboxActions.is_preview_active()){
-
+        return;
     } else {
         if (usesCursor){
             if (isPushed){
@@ -499,7 +506,7 @@ function moveHandler(cursor) {
 }
 
 function clickFunc(theCursor) {
-    console.log("CLICKETY-CLACK CLACK!");
+    // we don't actually use this.
     var xpos = theCursor.x * window.innerWidth;
     var ypos = theCursor.y * window.innerHeight;
 }
@@ -561,7 +568,7 @@ var DropboxActions = {
                 Browse.open_folder(file);
             } else if (file.preview_type) {
                 BrowseUtil.filepreview_from_selected(file);
-                jQuery('#cursor').css('left', '5px').css('top', '5px');
+                jQuery('#cursor').css('left', '5px').css('top', '5px').show();
             } else {
                 //WTF DO I DO NOW?????
                 //not a directory or file preview
@@ -578,12 +585,15 @@ var DropboxActions = {
         BrowseKeys.advanced_dict.up_dir.onPress();
     },
     next_preview : function() {
+        jQuery('#file-preview-menu').css('opacity', 1)
         $$('.next')[0].simulate('click');
     },
     prev_preview : function() {
+        jQuery('#file-preview-menu').css('opacity', 1)
         $$('.prev')[0].simulate('click');
     },
     close_preview : function() {
+        if (!usesCursor) jQuery('#cursor').hide();
         $$('.close')[0].simulate('click');
     },
     is_preview_active : function() {
@@ -626,7 +636,8 @@ function stationary_number(num){
 }
 
 //Limits things
-function Limiter(maxFrequency) {
+function Limiter(maxFrequency, verbose) {
+    var verbose = verbose || false;
     var lastFrame;
     var lastDelta;
     var lastDone;
@@ -640,8 +651,12 @@ function Limiter(maxFrequency) {
             markframe();
             now = (new Date()).getTime();
             if (lastDone === undefined || (now - lastDone) > maxFrequency) {
+                if (verbose) console.log('--------------------doin it.');
                 lastDone = now;
                 xx();
+            } else {
+                if (verbose) console.log('--------------------NOPE');
+                return;
             }
         }
     };
@@ -757,9 +772,6 @@ getScript(ZIGFU_FULL_URL, function() {
 
     Element.addMethods({ simulate: Event.simulate });
 })();
-
-
-console.log('welp, that is the end of the file');
 
 return DropboxActions;  //this is our only public api
 }();
