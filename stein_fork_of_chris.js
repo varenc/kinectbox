@@ -52,14 +52,14 @@ function toggleProMode() {
     usesCursor = !usesCursor;
     if (usesCursor){
         jQuery('#kinectState')
-            .css('backgroundColor', '1f75cc')
+            .css('backgroundColor', '#1f75cc')
             .text('EDIT MODE');
         jQuery('#cursor').show();
     } else {
         jQuery('#kinectState')
             .css('backgroundColor', '#88CC77')
             .text('BROWSE MODE');
-        jQuery('#cursor').show();
+        jQuery('#cursor').hide();
     }
 }
 
@@ -88,7 +88,7 @@ function runEverything() {
         .click(toggleProMode));
     if (usesCursor){
         jQuery('#kinectState')
-            .css('backgroundColor', '1f75cc')
+            .css('backgroundColor', '#1f75cc')
             .text('EDIT MODE');
         jQuery('#cursor').show()
     } else {
