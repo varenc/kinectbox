@@ -57,7 +57,7 @@ function toggleProMode() {
         jQuery('#cursor').show();
     } else {
         jQuery('#kinectState')
-            .css('backgroundColor', '#88CC77')
+            .css('backgroundColor', '#559944')
             .text('BROWSE MODE');
         jQuery('#cursor').hide();
     }
@@ -93,7 +93,7 @@ function runEverything() {
         jQuery('#cursor').show()
     } else {
         jQuery('#kinectState')
-            .css('backgroundColor', '#88CC77')
+            .css('backgroundColor', '#559944')
             .text('BROWSE MODE');
         jQuery('#cursor').hide()
     }
