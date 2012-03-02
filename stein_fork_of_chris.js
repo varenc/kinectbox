@@ -199,7 +199,7 @@ function runEverything() {
         //console.log('SwipeDetector: Swipe Up');f
     });
     swipeDetector.addEventListener('swipeup', function(pd) {
-        if (usesCursor && !DropboxActions.is_preview_active()) { return; }
+        if (!DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
             console.log('SwipeDetector: Swipe Up up up!', nnn);
             if (DropboxActions.is_preview_active()) {
@@ -210,7 +210,7 @@ function runEverything() {
         });
     });
     swipeDetector.addEventListener('swipedown', function(pd) {
-        if (usesCursor && !DropboxActions.is_preview_active()) { return; }
+        if (!DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
             console.log('SwipeDetector: Swipe Down', nnn);
             if (DropboxActions.is_preview_active()) {
