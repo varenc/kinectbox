@@ -88,7 +88,7 @@ function runEverything() {
         .click(toggleProMode));
     if (usesCursor){
         jQuery('#kinectState')
-            .css('backgroundColor', 'blue')
+            .css('backgroundColor', '1f75cc')
             .text('EDIT MODE');
         jQuery('#cursor').show()
     } else {
