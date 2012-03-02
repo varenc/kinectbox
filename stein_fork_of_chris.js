@@ -111,7 +111,7 @@ function runEverything() {
     var swipeDetector = zig.controls.SwipeDetector();
     swipeDetector.addEventListener('swipeup', function(pd) {
         //nothing
-        //console.log('SwipeDetector: Swipe Up');
+        //console.log('SwipeDetector: Swipe Up');f
     });
     swipeDetector.addEventListener('swipedown', function(pd) {
         if (usesCursor) { return; }
@@ -127,9 +127,11 @@ function runEverything() {
         swipeLimiter.doIfCan(function() {
             console.log('SwipeDetector: Swipe Left');
             if (DropboxActions.is_preview_active()) {
+                console.log('next preview!');
                 DropboxActions.next_preview();
             }
             else {
+                console.log('open selected!');
                 DropboxActions.open_selected();
             }
         });
@@ -444,7 +446,11 @@ var DropboxActions = {
         FileOps.do_bulk_move(clipboard, BrowseSelection.get_selected_files()[0].fq_path);
     },
     open_selected : function() {
-        BrowseURL.set_path_url(BrowseSelection.get_selected_files()[0].ns_id, BrowseSelection.get_selected_files()[0].ns_path);
+        console.log("open selected!");
+        elem = jQuery(BrowseSelection.get_selected_files()[0].get_div()).find('.filename-link')[0]
+        console.log("elem to open ---> ", elem);
+        elem.simulate('click');
+        //BrowseURL.set_path_url(BrowseSelection.get_selected_files()[0].ns_id, BrowseSelection.get_selected_files()[0].ns_path);
     },
     go_up_directory : function() {
         //this will escape gallery view AND go up a directory
