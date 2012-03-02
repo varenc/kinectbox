@@ -1,6 +1,6 @@
 
-var SWIPE_LIMIT = 700; //ms
-var FADER_SIZE = 250;
+var SWIPE_LIMIT = 800; //ms
+var FADER_SIZE = 450;
 kinectbox = function(){
 
 console.log('dstime to start loading things!');
@@ -187,7 +187,7 @@ function runEverything() {
     dmLimiter = Limiter(50);
     slowScrollLimiter = Limiter(500);
     scrollLimiter = Limiter(150);
-    swipeLimiter = Limiter(SWIPE_LIMIT);
+    swipeLimiter = Limiter(SWIPE_LIMIT, true);
 
     theCursor.addEventListener('click', clickFunc);
     theCursor.addEventListener('move', moveHandler);
@@ -642,7 +642,7 @@ function Limiter(maxFrequency, verbose) {
     var verbose = verbose || false;
     var lastFrame;
     var lastDelta;
-    var lastDone;
+    var lastDone = (new Date()).getTime() - 10000;
 
     var pub = {
         markframe : markframe,
@@ -652,6 +652,7 @@ function Limiter(maxFrequency, verbose) {
         doIfCan : function(xx) {
             markframe();
             now = (new Date()).getTime();
+            if (verbose) { console.log('lastDone - now -->' + (lastDone - now));    }
             if (lastDone === undefined || (now - lastDone) > maxFrequency) {
                 if (verbose) console.log('--------------------doin it! ' + now);
                 lastDone = now;
