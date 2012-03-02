@@ -110,7 +110,7 @@ function runEverything() {
     jQuery('body').append(cursorDiv);
 
     // add some pop-up shit. super hax
-    jQuery('#cursor').append('<div id=\"leftarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:-170px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:18px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"uparrow\" class=\"kinectArrow\" style=\"position:absolute; top:-170px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/jz7cqddt2nchewt/arrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"rightarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:80px;\"><img src=\"https://dl.dropbox.com/s/32kltg8ooibjmx8/rightarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:40px; left:55px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"downarrow\" class=\"kinectArrow\" style=\"position:absolute; top:80px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/8pfm4whijw18vw8/downarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"motivator\" class=\"kinectArrow\" style=\"position:absolute; top:-40px; left:-40px; font-weight:bold; font-size:30px; text-align:center;\"> THROW THE FILE! </div>');
+    jQuery('#cursor').append('<div id=\"leftarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:-170px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:18px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"uparrow\" class=\"kinectArrow\" style=\"position:absolute; top:-170px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/jz7cqddt2nchewt/arrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">Cut</div></div><div id=\"rightarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:80px;\"><img src=\"https://dl.dropbox.com/s/32kltg8ooibjmx8/rightarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:40px; left:55px; color:#fff; text-align:center; font-weight:bold;\">Open</div></div><div id=\"downarrow\" class=\"kinectArrow\" style=\"position:absolute; top:80px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/8pfm4whijw18vw8/downarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">Paste</div></div><div id=\"motivator\" class=\"kinectArrow\" style=\"position:absolute; top:-40px; left:-40px; font-weight:bold; font-size:30px; text-align:center;\"> THROW THE FILE! </div>');
     jQuery('.kinectArrow').css('opacity', 0.6).hide();
     jQuery('body').append(jQuery('<div>')
         .css('position', 'fixed')
@@ -124,7 +124,9 @@ function runEverything() {
     xAvger = simple_moving_averager(avgDepth);
     yAvger = simple_moving_averager(avgDepth);
     isCursorMoving = true;
-    scrollLimiter = Limiter(200);
+
+    slowScrollLimiter = Limiter(500);
+    scrollLimiter = Limiter(150);
     swipeLimiter = Limiter(500);
 
     theCursor.addEventListener('click', clickFunc);
@@ -138,7 +140,7 @@ function runEverything() {
         //console.log('SwipeDetector: Swipe Up');f
     });
     swipeDetector.addEventListener('swipedown', function(pd) {
-        if (usesCursor) { return; }
+        if (usesCursor && !DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
             console.log('SwipeDetector: Swipe Down');
             if (DropboxActions.is_preview_active()) {
@@ -147,7 +149,7 @@ function runEverything() {
         });
     });
     swipeDetector.addEventListener('swipeleft', function(pd) {
-        if (usesCursor) { return; }
+        if (usesCursor && !DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
             console.log('SwipeDetector: Swipe Left');
             if (DropboxActions.is_preview_active()) {
@@ -161,7 +163,7 @@ function runEverything() {
         });
     });
     swipeDetector.addEventListener('swiperight', function(pd) {
-        if (usesCursor) { return; }
+        if (usesCursor && !DropboxActions.is_preview_active()) { return; }
         swipeLimiter.doIfCan(function() {
             console.log('SwipeDetector: Swipe Right');
             if (DropboxActions.is_preview_active()) {
@@ -261,19 +263,19 @@ function getY(theCursor){
 }
 
 function leftAction(){
-    Notify.server_success('left action');
+    DropboxActions.go_up_directory();
 }
 
 function rightAction(){
-    Notify.server_success('right action');
+    DropboxActions.open_selected();
 }
 
 function downAction(){
-    Notify.server_success('down action');
+    DropboxActions.paste_to_selected_folder();
 }
 
 function topAction(){
-    Notify.server_success('top action');
+    DropboxActions.store_selected_to_clipboard();
 }
 
 function swipeLeftAction(){
@@ -396,21 +398,32 @@ function handleUnpushedMove(x, y, visible_cursor){
 function handleFileMove(cur, visible_cursor){
     var sfs = BrowseSelection.get_selected_files();
     var next_index = 0;
+    var fast = false;
     if (sfs.length > 0) {
         var selected_file = sfs[0];
         var rank = selected_file.sort_rank;
-        if (cur.y < .1) {
+        if (cur.y < .35) {
             next_index = Math.max(0, rank - 1);
-        } else if (cur.y > .9) {
+        } else if (cur.y > .65) {
             next_index = Math.min(Browse.files.length, rank + 1);
         } else {
             next_index = rank;
         }
+        if (cur.y < .17 || cur.y > .83){
+            fast = true;
+        }
     }
-    scrollLimiter.doIfCan(function() {
-        Browse.scrollTo(Browse.files[next_index].get_div());
-        BrowseSelection.set_selected_files(Browse.files[next_index]);
-    });
+    if (fast){
+        scrollLimiter.doIfCan(function() {
+            Browse.scrollTo(Browse.files[next_index].get_div());
+            BrowseSelection.set_selected_files(Browse.files[next_index]);
+        });
+    } else {
+        slowScrollLimiter.doIfCan(function() {
+            Browse.scrollTo(Browse.files[next_index].get_div());
+            BrowseSelection.set_selected_files(Browse.files[next_index]);
+        });
+    }
 }
 
 function moveHandler(cursor) {
@@ -456,7 +469,7 @@ function releaseFunc(theCursor) {
 }
 
 function pushFunc(theCursor){
-    if (!usesCursor) return;
+    if (!usesCursor || DropboxActions.is_preview_active()) return;
     isPushed = true;
 
     jQuery('#fileCursor').empty().append(jQuery('#'+BrowseSelection.get_selected_files()[0].get_div().id).find('.icon').clone());
@@ -466,7 +479,7 @@ function pushFunc(theCursor){
     jQuery('#cursor').css('opacity', 0.8);
     jQuery("#cursor").css('width', cursorWidth * 1.2);
     jQuery("#cursor").css('height', cursorWidth * 1.2);
-    setTimeout(function(){atLastRelease(theCursor)}, 1500);
+    setTimeout(function(){atLastRelease(theCursor)}, 2500);
 }
 
 var DropboxActions = {
@@ -476,9 +489,15 @@ var DropboxActions = {
     },
     store_selected_to_clipboard : function() {
         clipboard = BrowseSelection.get_selected_files();
+        Notify.server_success('Cut ' + BrowseSelection.get_selected_files()[0].fq_path);
     },
     paste_to_selected_folder : function() {
+        if (!BrowseSelection.get_selected_files()[0].dir){
+            Notify.server_error('cannot paste in not a dir');
+            return;
+        }
         FileOps.do_bulk_move(clipboard, BrowseSelection.get_selected_files()[0].fq_path);
+        Notify.server_success('pasted ' + clipboard[0].fq_path + ' in ' + BrowseSelection.get_selected_files()[0].fq_path);
     },
     open_selected : function() {
         var selection = BrowseSelection.get_selected_files();

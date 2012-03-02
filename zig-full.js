@@ -630,8 +630,8 @@ function Fader3D(size) {
 
 // 2D fader
 function Fader2D(width, height) {
-	width = width || 700;
-	height = height || 500;
+	width = width || 600;
+	height = height || 450;
 
 	var events = Events();
 	var api = {
