@@ -336,6 +336,23 @@ function handleUnpushedMove(x, y, visible_cursor){
     }
 }
 
+function handleFileMove(cur, visible_cursor){
+    if (BrowseSelection.get_selected_files() != []) {
+        var selected_file = BrowseSelection.get_selected_files()[0];
+        var rank = selected_file.sort_rank;
+        var next_index;
+        if (cur.y < .3) {
+            next_index = Math.max(0, rank - 1);
+        } else if (cur.y > .7) {
+            next_index = Math.max(0, rank - 0);
+        } else {
+            next_index = rank;
+        }
+    }
+    Browse.scrollTo(Browse.files[next_index - 1].get_div());
+    BrowseSelection.set_selected_files(Browse.files[next_index]);
+}
+
 function moveHandler(cursor) {
     var x = xAvger(getX(c));
     var y = yAvger(getY(c));
@@ -351,7 +368,7 @@ function moveHandler(cursor) {
                 handleUnpushedMove(x, y, true);
             }
         } else {
-            handleUnpushedMove(x, y, false);
+            handleFileMove(c, false);
         }
     }
 }
