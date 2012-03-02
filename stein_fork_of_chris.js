@@ -1,8 +1,3 @@
-//NOTE: web3 uses prototype, so we should to
-//TODO: fix this. ^
-
-//NOTE: block comments fuck the minification hax
-//javascript:(
 console.log('dstime to start loading things!');
 var ZIGFU_FULL_URL = 'https://dl.dropbox.com/s/q1wudh4xu7man9m/zig-full.js?dl=1';
 var LOADING_ANIMATED_GIF = 'https://dl.dropbox.com/s/jd57hlkkmpey86m/dbx_animation.gif?dl=1'
@@ -11,13 +6,18 @@ var TOP_OFFSET = 127;
 var LEFT_OFFSET = 180;
 var avgDepth = 6;
 var isPushed = false;
+var cursorWidth = 15;
 
 var codexStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 var codexInt = [];
+
+var xAvger, yAvger, isCursorMoving, scrollLimiter, c;
+
 for(var i = 0; i < 256; i++) {
     var idx = codexStr.indexOf(String.fromCharCode(i));
     codexInt[i] = idx;
 }
+
 var saturate = 128;
 
 var otherlib=false,
@@ -30,26 +30,6 @@ var vidcontainer = document.getElementById('main-nav').appendChild(document.crea
     vidcontainer.style.width = '150px';
     vidcontainer.innerHTML = '<img src=\"'+LOADING_ANIMATED_GIF+'\" />';
 
-// more or less stolen form jquery core and adapted by paul irish
-function getScript(url,success){
-    var script=document.createElement('script');
-    script.src=url;
-    var head=document.getElementsByTagName('head')[0],
-        done=false;
-    // Attach handlers for all browsers
-    script.onload=script.onreadystatechange = function(){
-        if ( !done && (!this.readyState
-           || this.readyState == 'loaded'
-           || this.readyState == 'complete') ) {
-            done=true;
-            success();
-            script.onload = script.onreadystatechange = null;
-            head.removeChild(script);
-        }
-    };
-    head.appendChild(script);
-}
-
 function killZigfuStuff() {
     setTimeout(function() {$$('a[href=http://site.zigfu.com/main/watermark]')[0].style.opacity = 0;}, 300);
     setTimeout(function() {$$('a[href=http://site.zigfu.com/main/watermark]')[0].style.opacity = 0;}, 600);
@@ -59,64 +39,54 @@ function killZigfuStuff() {
 
 function runEverything() {
     //LETS GET STARTED.
+    var plugin, pluginContainer
     console.log("running everything");
     killZigfuStuff();
 
     //setup video
     vidcontainer.innerHTML = '<div id=\"canvasCont\"><div id=\"depthCan\"><canvas style=\"width:100%; height:100%;\" id=\"depth\" width=\"160\" height=\"120\"></canvas></div></div>';
     jQuery('#main-nav').append('<div id=\"waveTell\">WAVE TO GET CURSOR</div>');
-    var pluginContainer = document.body.appendChild(document.createElement('div'));
+    pluginContainer = document.body.appendChild(document.createElement('div'));
     pluginContainer.id = 'pluginContainer';
     pluginContainer.innerHTML = '<object id=\"ZigPlugin\" type=\"application/x-zig\" width=\"0\" height=\"0\"><param name=\"onload\" value=\"ZigPluginLoaded\" /></object>';
-    var plugin = document.getElementById("ZigPlugin");
+    plugin = document.getElementById("ZigPlugin");
 
-    // start
+    // start zig
     zig.init(plugin);
-    var handleDepth = function(u) {
-        drawDM(plugin);
-    }
-    plugin.addEventListener("NewFrame", handleDepth, false);
+    plugin.addEventListener("NewFrame", function(u){drawDM(plugin);}, false);
     plugin.requestStreams(true, true, false);
 
-
     // setup cursor!!
-    var c = zig.controls.Cursor();
-    var cursorWidth = 15;
-    cursorDiv = jQuery('<div>').css('position', 'fixed').css('display', 'block').css('height', cursorWidth + 'px');
-    cursorDiv.css('width', cursorWidth+'px').css('backgroundColor', 'blue').attr('id', 'cursor');
-    cursorDiv.css('border-radius', cursorWidth/2).css('z-index', 65535);
+    c = zig.controls.Cursor();
+    cursorDiv = jQuery('<div>')
+                    .css('position', 'fixed')
+                    .css('display', 'block')
+                    .css('height', cursorWidth + 'px')
+                    .css('width', cursorWidth+'px')
+                    .css('backgroundColor', 'blue')
+                    .css('border-radius', cursorWidth/2)
+                    .css('z-index', 65535)
+                    .attr('id', 'cursor');
     jQuery('body').append(cursorDiv);
-    // add some pop-up shit. super
+
+    // add some pop-up shit. super hax
     jQuery('#cursor').append('<div id=\"leftarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:-170px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:18px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"uparrow\" class=\"kinectArrow\" style=\"position:absolute; top:-170px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/cmtc0d6cq6ziotu/leftarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"rightarrow\" class=\"kinectArrow\" style=\"position:absolute; top:-45px; left:80px;\"><img src=\"https://dl.dropbox.com/s/32kltg8ooibjmx8/rightarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:40px; left:55px; color:#fff; text-align:center; font-weight:bold;\">parent folder</div></div><div id=\"downarrow\" class=\"kinectArrow\" style=\"position:absolute; top:80px; left:-45px;\"><img src=\"https://dl.dropbox.com/s/8pfm4whijw18vw8/downarrow.png?dl=1\" style=\"position: absolute;\" /><div style=\"position: absolute; top:36px; left:24px; color:#fff; text-align:center; font-weight:bold;\">move or something</div></div><div id=\"motivator\" class=\"kinectArrow\" style=\"position:absolute; top:-40px; left:-40px; font-weight:bold; font-size:30px; text-align:center;\"> THROW THE FILE! </div>');
     jQuery('.kinectArrow').css('opacity', 0.6).hide();
-    jQuery('body').append(jQuery('<div>').css('position', 'fixed').css('height', cursorWidth + 'px').css('z-index', 65536).attr('id', 'fileCursor'));
+    jQuery('body').append(jQuery('<div>')
+        .css('position', 'fixed')
+        .css('height', cursorWidth + 'px')
+        .css('z-index', 65536).attr('id', 'fileCursor'));
     jQuery('#fileCursor').hide();
 
-    //I added an averger here so its less bouncy...maybe we can do better than simple rolling average.
-    var xAvger = simple_moving_averager(avgDepth);
-    var yAvger = simple_moving_averager(avgDepth);
-    var isCursorMoving = true;
-    var scrollLimiter = Limiter(500); // can only do it once every 500 ms
+    xAvger = simple_moving_averager(avgDepth);
+    yAvger = simple_moving_averager(avgDepth);
+    isCursorMoving = true;
+    scrollLimiter = Limiter(500);
 
-    // show/hide cursor on session start/end
-    zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
-        xAvger = simple_moving_averager(avgDepth);
-        yAvger = simple_moving_averager(avgDepth);
-        console.log('session start!');
-        saturate = 255;
-        jQuery('#waveTell').hide();
-        jQuery("#cursor").css('backgroundColor', 'blue');
-        });
-
-    zig.singleUserSession.addEventListener('sessionend', function() {
-        xAvger = stationary_number(jQuery("#cursor").css('left'));
-        yAvger = stationary_number(jQuery("#cursor").css('top'));
-        isCursorMoving = true;
-        saturate = 128;
-        console.log('session end!');
-        jQuery('#waveTell').show();
-        jQuery("#cursor").css('backgroundColor', 'green').css('z-index', 65535);
-        });
+    c.addEventListener('click', clickFunc);
+    c.addEventListener('move', moveHandler);
+    c.addEventListener('push', pushFunc);
+    c.addEventListener('release', releaseFunc);
 
     var swipeDetector = zig.controls.SwipeDetector();
     swipeDetector.addEventListener('swipeup', function(pd) {
@@ -134,14 +104,10 @@ function runEverything() {
     swipeDetector.addEventListener('swipe', function(dir) {
         console.log('SwipeDetector: Swipe direction: ' + dir);
     });
+
     zig.singleUserSession.addListener(swipeDetector);
-
-    c.addEventListener('click', clickFunc);
-    c.addEventListener('move', moveHandler);
-    c.addEventListener('push', pushFunc);
-    c.addEventListener('release', releaseFunc);
-
-    // add the cursor to our singleUserSession to make sure we get events
+    zig.singleUserSession.addEventListener('sessionstart', sessionStartFunc);
+    zig.singleUserSession.addEventListener('sessionend', sessionEndFunc);
     zig.singleUserSession.addListener(c);
     console.log('everything is loaded');
 }
@@ -186,6 +152,25 @@ function drawDM(plugin) {
         data[i*4 + 3] = saturate;
     }
     ctx.putImageData(pix, 0, 0);
+}
+
+function sessionStartFunc(focusPosition) {
+    xAvger = simple_moving_averager(avgDepth);
+    yAvger = simple_moving_averager(avgDepth);
+    console.log('session start!');
+    saturate = 255;
+    jQuery('#waveTell').hide();
+    jQuery("#cursor").css('backgroundColor', 'blue');
+}
+
+function sessionEndFunc() {
+    xAvger = stationary_number(jQuery("#cursor").css('left'));
+    yAvger = stationary_number(jQuery("#cursor").css('top'));
+    isCursorMoving = true;
+    saturate = 128;
+    console.log('session end!');
+    jQuery('#waveTell').show();
+    jQuery("#cursor").css('backgroundColor', 'green').css('z-index', 65535);
 }
 
 function getX(c){
@@ -443,6 +428,26 @@ function Limiter(maxFrequency) {
 
 //load modules then call runEverything
 // zigfu
+// more or less stolen form jquery core and adapted by paul irish
+function getScript(url,success){
+    var script=document.createElement('script');
+    script.src=url;
+    var head=document.getElementsByTagName('head')[0],
+        done=false;
+    // Attach handlers for all browsers
+    script.onload=script.onreadystatechange = function(){
+        if ( !done && (!this.readyState
+           || this.readyState == 'loaded'
+           || this.readyState == 'complete') ) {
+            done=true;
+            success();
+            script.onload = script.onreadystatechange = null;
+            head.removeChild(script);
+        }
+    };
+    head.appendChild(script);
+}
+
 getScript(ZIGFU_FULL_URL, function() {
     if (typeof zig=='undefined') {
         msg='Sorry, but zig-full wasn\'t able to load';
