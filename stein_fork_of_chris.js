@@ -362,6 +362,18 @@ var DropboxActions = {
     go_up_directory : function() {
         //this will escape gallery view AND go up a directory
         BrowseKeys.advanced_dict.up_dir.onPress();
+    },
+    next_preview : function() {
+        $$('.next')[0].simulate('click');
+    },
+    prev_preview : function() {
+        $$('.prev')[0].simulate('click');
+    },
+    close_preview : function() {
+        $$('.close')[0].simulate('click');
+    },
+    is_preview_active : function() {
+        return FilePreviewModal.shown;
     }
 };
 
@@ -393,7 +405,7 @@ function stationary_number(num){
     }
 }
 
-//
+//Limits things
 function Limiter(maxFrequency) {
     var lastFrame;
     var lastDelta;
