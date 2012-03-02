@@ -630,8 +630,8 @@ function Fader3D(size) {
 
 // 2D fader
 function Fader2D(width, height) {
-	width = width || 300;
-	height = height || 250;
+	width = width || 700;
+	height = height || 500;
 
 	var events = Events();
 	var api = {
@@ -1408,7 +1408,7 @@ zig = (function() {
 	}
 
 	function getItemById(collection, id) {
-		for (key in collection) if (collection.hasOwnProperty(key)) {
+		for (var key in collection) if (collection.hasOwnProperty(key)) {
 			if (collection[key].id == id) return collection[key];
 		}
 		return undefined;

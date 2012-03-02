@@ -14,7 +14,7 @@ var currentPath = [];
 
 //state variables
 var isPushed = false;
-var usesCursor = false;
+var usesCursor = true;
 
 /*
 var UI_MODES = {
@@ -181,6 +181,10 @@ function runEverything() {
     zig.singleUserSession.addEventListener('sessionend', sessionEndFunc);
     zig.singleUserSession.addListener(theCursor);
     console.log('everything is loaded');
+
+
+
+
 }
 
 var Base64 =
