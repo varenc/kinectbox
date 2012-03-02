@@ -52,7 +52,7 @@ function toggleProMode() {
     usesCursor = !usesCursor;
     if (usesCursor){
         jQuery('#kinectState')
-            .css('backgroundColor', 'blue')
+            .css('backgroundColor', '1f75cc')
             .text('EDIT MODE');
         jQuery('#cursor').show();
     } else {
@@ -100,7 +100,12 @@ function runEverything() {
 
     //setup video
     vidcontainer.innerHTML = '<div id=\"canvasCont\"><div id=\"depthCan\"><canvas style=\"width:100%; height:100%;\" id=\"depth\" width=\"160\" height=\"120\"></canvas></div></div>';
-    jQuery('#main-nav').append('<div id=\"waveTell\">WAVE TO GET CURSOR</div>');
+    jQuery('#main-nav').append('<div id=\"waveTell\">WAVE TO GET FOCUS</div>');
+    jQuery('#waveTell').css('position', 'relative')
+        .css('top', '-112px')
+        .css('font-weight', 'bold')
+        .css('color', 'white')
+        .css('text-align', 'center');
     pluginContainer = document.body.appendChild(document.createElement('div'));
     pluginContainer.id = 'pluginContainer';
     pluginContainer.innerHTML = '<object id=\"ZigPlugin\" type=\"application/x-zig\" width=\"0\" height=\"0\"><param name=\"onload\" value=\"ZigPluginLoaded\" /></object>';
