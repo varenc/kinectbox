@@ -1,3 +1,5 @@
+function qwertyuiop_go() {
+
 console.log('dstime to start loading things!');
 
 //constants
@@ -12,7 +14,7 @@ var currentPath = [];
 
 //state variables
 var isPushed = false;
-var usesCursor = true;
+var usesCursor = false;
 
 /*
 var UI_MODES = {
@@ -27,7 +29,7 @@ var UI_MODES = {
 var codexStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 var codexInt = [];
 
-var xAvger, yAvger, isCursorMoving, scrollLimiter, c;
+var xAvger, yAvger, isCursorMoving, scrollLimiter, theCursor;
 
 for(var i = 0; i < 256; i++) {
     var idx = codexStr.indexOf(String.fromCharCode(i));
@@ -94,7 +96,7 @@ function runEverything() {
     plugin.requestStreams(true, true, false);
 
     // setup cursor!!
-    c = zig.controls.Cursor();
+    theCursor = zig.controls.Cursor();
     cursorDiv = jQuery('<div>')
                     .css('position', 'fixed')
                     .css('display', 'block')
@@ -124,10 +126,10 @@ function runEverything() {
     scrollLimiter = Limiter(200);
     swipeLimiter = Limiter(500);
 
-    c.addEventListener('click', clickFunc);
-    c.addEventListener('move', moveHandler);
-    c.addEventListener('push', pushFunc);
-    c.addEventListener('release', releaseFunc);
+    theCursor.addEventListener('click', clickFunc);
+    theCursor.addEventListener('move', moveHandler);
+    theCursor.addEventListener('push', pushFunc);
+    theCursor.addEventListener('release', releaseFunc);
 
 
     var swipeDetector = zig.controls.SwipeDetector();
@@ -177,7 +179,7 @@ function runEverything() {
     zig.singleUserSession.addListener(swipeDetector);
     zig.singleUserSession.addEventListener('sessionstart', sessionStartFunc);
     zig.singleUserSession.addEventListener('sessionend', sessionEndFunc);
-    zig.singleUserSession.addListener(c);
+    zig.singleUserSession.addListener(theCursor);
     console.log('everything is loaded');
 }
 
@@ -242,15 +244,15 @@ function sessionEndFunc() {
     jQuery("#cursor").css('backgroundColor', 'green').css('z-index', 65535);
 }
 
-function getX(c){
+function getX(theCursor){
     var scaler = (window.innerWidth - LEFT_OFFSET);
-    var raw_x = Math.max(0, Math.min(scaler, (c.x * scaler * 1.2) - (scaler * 0.1)));
+    var raw_x = Math.max(0, Math.min(scaler, (theCursor.x * scaler * 1.2) - (scaler * 0.1)));
     return raw_x + LEFT_OFFSET - (cursorWidth/2);
 }
 
-function getY(c){
+function getY(theCursor){
     var scaler = (window.innerHeight - (TOP_OFFSET));
-    var raw_y = Math.max(0, Math.min(scaler, (c.y * scaler * 1.2) - (scaler * 0.1)));
+    var raw_y = Math.max(0, Math.min(scaler, (theCursor.y * scaler * 1.2) - (scaler * 0.1)));
     return raw_y + TOP_OFFSET - (cursorWidth/2);
 }
 
@@ -410,7 +412,7 @@ function handleFileMove(cur, visible_cursor){
 function moveHandler(cursor) {
     var x = xAvger(getX(cursor));
     var y = yAvger(getY(cursor));
-    //console.log('rx ry x y bottom top', Math.floor(getX(c)), Math.floor(getY(c)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
+    //console.log('rx ry x y bottom top', Math.floor(getX(theCursor)), Math.floor(getY(theCursor)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
     if (DropboxActions.is_preview_active()){
 
     } else {
@@ -427,13 +429,13 @@ function moveHandler(cursor) {
     }
 }
 
-function clickFunc(c) {
+function clickFunc(theCursor) {
     console.log("CLICKETY-CLACK CLACK!");
-    var xpos = c.x * window.innerWidth;
-    var ypos = c.y * window.innerHeight;
+    var xpos = theCursor.x * window.innerWidth;
+    var ypos = theCursor.y * window.innerHeight;
 }
 
-function atLastRelease(c){
+function atLastRelease(theCursor){
     if (!usesCursor) return;
     isPushed = false;
     jQuery('.kinectArrow').hide();
@@ -445,11 +447,11 @@ function atLastRelease(c){
     jQuery("#cursor").css('height', cursorWidth);
 }
 
-function releaseFunc(c) {
+function releaseFunc(theCursor) {
 
 }
 
-function pushFunc(c){
+function pushFunc(theCursor){
     if (!usesCursor) return;
     isPushed = true;
 
@@ -460,7 +462,7 @@ function pushFunc(c){
     jQuery('#cursor').css('opacity', 0.8);
     jQuery("#cursor").css('width', cursorWidth * 1.2);
     jQuery("#cursor").css('height', cursorWidth * 1.2);
-    setTimeout(function(){atLastRelease(c)}, 1500);
+    setTimeout(function(){atLastRelease(theCursor)}, 1500);
 }
 
 var DropboxActions = {
@@ -676,3 +678,5 @@ getScript(ZIGFU_FULL_URL, function() {
 
 
 console.log('welp, that is the end of the file');
+}
+qwertyuiop_go();
