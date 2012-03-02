@@ -1,4 +1,4 @@
-function qwertyuiop_go() {
+kinectbox = function(){
 
 console.log('dstime to start loading things!');
 
@@ -91,6 +91,7 @@ function runEverything() {
     plugin = document.getElementById("ZigPlugin");
 
     // start zig
+
     zig.init(plugin);
     plugin.addEventListener("NewFrame", function(u){drawDM(plugin);}, false);
     plugin.requestStreams(true, true, false);
@@ -130,7 +131,6 @@ function runEverything() {
     theCursor.addEventListener('move', moveHandler);
     theCursor.addEventListener('push', pushFunc);
     theCursor.addEventListener('release', releaseFunc);
-
 
     var swipeDetector = zig.controls.SwipeDetector();
     swipeDetector.addEventListener('swipeup', function(pd) {
@@ -624,7 +624,6 @@ getScript(ZIGFU_FULL_URL, function() {
     });
 });
 
-
 (function(){
 
     var eventMatchers = {
@@ -682,5 +681,6 @@ getScript(ZIGFU_FULL_URL, function() {
 
 
 console.log('welp, that is the end of the file');
-}
-qwertyuiop_go();
+
+return DropboxActions;  //this is our only public api
+}();
