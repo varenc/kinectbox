@@ -1,12 +1,27 @@
 console.log('dstime to start loading things!');
+
+//constants
 var ZIGFU_FULL_URL = 'https://dl.dropbox.com/s/q1wudh4xu7man9m/zig-full.js?dl=1';
 var LOADING_ANIMATED_GIF = 'https://dl.dropbox.com/s/jd57hlkkmpey86m/dbx_animation.gif?dl=1'
 
 var TOP_OFFSET = 127;
 var LEFT_OFFSET = 180;
 var avgDepth = 6;
-var isPushed = false;
 var cursorWidth = 15;
+
+//state variables
+var isPushed = false;
+var usesCursor = false;
+
+/*
+var UI_MODES = {
+    PUSHED = 0;
+    UNPUSHED = 1;
+    NO_CURSOR = 2;
+    PREVIEW_NO_CURSOR = 3;
+    PREVIEW_CURSOR = 4;
+}
+*/
 
 var codexStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 var codexInt = [];
@@ -77,6 +92,9 @@ function runEverything() {
         .css('height', cursorWidth + 'px')
         .css('z-index', 65536).attr('id', 'fileCursor'));
     jQuery('#fileCursor').hide();
+    if (!usesCursor){
+        jQuery('#cursor').hide();
+    }
 
     xAvger = simple_moving_averager(avgDepth);
     yAvger = simple_moving_averager(avgDepth);
@@ -201,6 +219,14 @@ function topAction(){
     console.log('topaction');
 }
 
+function swipeLeftAction(){
+    console.log('swipeLeftAction');
+}
+
+function swipeRightAction(){
+    console.log('swipeRightAction');
+}
+
 function lingerify(e){
     var ot = jQuery('#cursor').css('top');
     var ol = jQuery('#cursor').css('left');
@@ -274,17 +300,11 @@ function handlePushedMove(x, y){
     }
 }
 
-function moveHandler(cursor) {
-    var x = xAvger(getX(c));
-    var y = yAvger(getY(c));
-    //console.log('rx ry x y bottom top', Math.floor(getX(c)), Math.floor(getY(c)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
-    if (isPushed){
-        handlePushedMove(x, y);
-        return;
+function handleUnpushedMove(x, y, visible_cursor){
+    if (visible_cursor){
+        jQuery("#cursor").css('left', x + "px");
+        jQuery("#cursor").css('top', y + "px");
     }
-    jQuery("#cursor").css('left', x + "px");
-    jQuery("#cursor").css('top', y + "px");
-
     cursorOver = jQuery(document.elementFromPoint(x - 3, y - 3)); //scoot over and up so we don't select the cursor
     browseFileParent = cursorOver.closest('.browse-file');
 
@@ -312,6 +332,26 @@ function moveHandler(cursor) {
                 Browse.scrollTo(Browse.files[rank - 1].get_div());
                 BrowseSelection.set_selected_files(Browse.files[Math.max(0, rank-1)]);
             });
+        }
+    }
+}
+
+function moveHandler(cursor) {
+    var x = xAvger(getX(c));
+    var y = yAvger(getY(c));
+    //console.log('rx ry x y bottom top', Math.floor(getX(c)), Math.floor(getY(c)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
+    if (DropboxActions.is_preview_active()){
+
+    } else {
+        if (usesCursor){
+            if (isPushed){
+                handlePushedMove(x, y);
+                return;
+            } else {
+                handleUnpushedMove(x, y, true);
+            }
+        } else {
+            handleUnpushedMove(x, y, false);
         }
     }
 }
