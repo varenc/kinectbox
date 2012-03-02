@@ -222,7 +222,7 @@ function lingerify(e){
     }, 2000);
 }
 
-function handlePush(x, y){
+function handlePushedMove(x, y){
     jQuery("#fileCursor").css('left', x + "px");
     jQuery("#fileCursor").css('top', y + "px");
 
@@ -279,7 +279,7 @@ function moveHandler(cursor) {
     var y = yAvger(getY(c));
     //console.log('rx ry x y bottom top', Math.floor(getX(c)), Math.floor(getY(c)), Math.floor(x), Math.floor(y), TOP_OFFSET, window.innerHeight);
     if (isPushed){
-        handlePush(x, y);
+        handlePushedMove(x, y);
         return;
     }
     jQuery("#cursor").css('left', x + "px");
