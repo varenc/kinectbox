@@ -8,10 +8,11 @@ var TOP_OFFSET = 127;
 var LEFT_OFFSET = 180;
 var avgDepth = 6;
 var cursorWidth = 15;
+var currentPath = [];
 
 //state variables
 var isPushed = false;
-var usesCursor = false;
+var usesCursor = true;
 
 /*
 var UI_MODES = {
@@ -44,6 +45,27 @@ var vidcontainer = document.getElementById('main-nav').appendChild(document.crea
     vidcontainer.style.height = '112px';
     vidcontainer.style.width = '150px';
     vidcontainer.innerHTML = '<img src=\"'+LOADING_ANIMATED_GIF+'\" />';
+
+function simulatedClick(){
+    
+}
+
+function openSelectedFile(){
+    
+}
+
+function enterSelectedFolder(){
+    var currentSelection = BrowseSelection.get_selected_files()[0];
+    BrowseURL.set_path_url(currentSelection.ns_id, currentSelection.ns_path, true);
+    currentPath = currentPath.concat([[currentSelection.ns_id, currentSelection.ns_path]]);
+}
+
+function upFolder(){
+    var upwardPath = currentPath[currentPath.length - 1];
+    if (typeof upwardPath == 'undefined') return;
+    currentPath.splice(currentPath.length-1, 1);
+    BrowseURL.set_path_url(upwardPath.ns_id, upwardPath.ns_path, true);
+}
 
 function killZigfuStuff() {
     setTimeout(function() {$$('a[href=http://site.zigfu.com/main/watermark]')[0].style.opacity = 0;}, 300);
@@ -231,19 +253,19 @@ function getY(c){
 }
 
 function leftAction(){
-    console.log('leftaction');
+    Notify.server_success('left action');
 }
 
 function rightAction(){
-    console.log('rightaction');
+    Notify.server_success('right action');
 }
 
 function downAction(){
-    console.log('downaction');
+    Notify.server_success('down action');
 }
 
 function topAction(){
-    console.log('topaction');
+    Notify.server_success('top action');
 }
 
 function swipeLeftAction(){
@@ -254,6 +276,7 @@ function swipeRightAction(){
     console.log('swipeRightAction');
 }
 
+/*
 function lingerify(e){
     var ot = jQuery('#cursor').css('top');
     var ol = jQuery('#cursor').css('left');
@@ -273,7 +296,7 @@ function lingerify(e){
         jQuery('#tempElementThing').remove();
     }, 2000);
 }
-
+*/
 function handlePushedMove(x, y){
     jQuery("#fileCursor").css('left', x + "px");
     jQuery("#fileCursor").css('top', y + "px");
@@ -303,7 +326,7 @@ function handlePushedMove(x, y){
         }
     }
     if ((relative_y > threshold) && (relative_y > Math.abs(relative_x))){
-        if (relative_x > final_threshold){
+        if (relative_y > final_threshold){
             el = jQuery('#downarrow').clone();
             downAction();
         } else {
@@ -321,8 +344,8 @@ function handlePushedMove(x, y){
         }
     }
     if (Math.max(Math.abs(relative_y), Math.abs(relative_x)) > final_threshold) {
-        releaseFunc(null);
-        lingerify(el);
+        atLastRelease(null);
+        jQuery('#fileCursor').hide();
     }
 }
 
@@ -408,15 +431,20 @@ function clickFunc(c) {
     var ypos = c.y * window.innerHeight;
 }
 
-function releaseFunc(c) {
+function atLastRelease(c){
     if (!usesCursor) return;
     isPushed = false;
     jQuery('.kinectArrow').hide();
     jQuery('#fileCursor').hide();
 
+    console.log('              ...release');
     jQuery('#cursor').css('opacity', 0.5);
     jQuery("#cursor").css('width', cursorWidth);
     jQuery("#cursor").css('height', cursorWidth);
+}
+
+function releaseFunc(c) {
+
 }
 
 function pushFunc(c){
@@ -426,10 +454,11 @@ function pushFunc(c){
     jQuery('#fileCursor').empty().append(jQuery('#'+BrowseSelection.get_selected_files()[0].get_div().id).find('.icon').clone());
     jQuery('#fileCursor').show();
     jQuery('.kinectArrow').show();
-    //console.log('dsPUSH');
+    console.log('dsPUSH');
     jQuery('#cursor').css('opacity', 0.8);
     jQuery("#cursor").css('width', cursorWidth * 1.2);
     jQuery("#cursor").css('height', cursorWidth * 1.2);
+    setTimeout(function(){atLastRelease(c)}, 1500);
 }
 
 var DropboxActions = {
